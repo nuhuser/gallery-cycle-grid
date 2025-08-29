@@ -14,7 +14,7 @@ const Index = () => {
           <div className="space-y-8 animate-slide-up">
             <div>
               <h1 className="heading-display">
-                NUH ALI
+                Nuh Ali
               </h1>
               <p className="text-base text-muted-foreground mt-6 max-w-md leading-relaxed">
                 A curated collection of visual narratives, design explorations, and creative endeavors.
