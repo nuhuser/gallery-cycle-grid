@@ -1,6 +1,9 @@
 import { HeroFrame } from '@/components/HeroFrame';
-import { PhotoGrid } from '@/components/PhotoGrid';
+import { DatabasePhotoGrid } from '@/components/DatabasePhotoGrid';
 import { Navigation } from '@/components/Navigation';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -51,7 +54,7 @@ const Index = () => {
         </div>
         
         <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
-          <PhotoGrid />
+          <DatabasePhotoGrid />
         </div>
       </section>
 
@@ -78,6 +81,19 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Admin Access Button */}
+      <div className="fixed bottom-6 right-6">
+        <Link to="/admin">
+          <Button
+            variant="secondary"
+            size="icon"
+            className="w-12 h-12 rounded-full shadow-elegant hover:shadow-frame transition-all duration-300"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
