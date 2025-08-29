@@ -1,1 +1,17 @@
 project_id = "ivjseqqgsohvyjwjfnkh"
+
+[api]
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://lovable.dev"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ups = false
+
+[functions.create-admin-user]
+verify_jwt = false
