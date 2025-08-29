@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Star } from 'lucide-react';
+import { Edit, Trash2, Star, Eye, Layout } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -76,6 +76,24 @@ export const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDe
               <span>{project.files?.length || 0} files</span>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/project/${project.slug}`, '_blank')}
+                className="flex items-center gap-1"
+              >
+                <Eye className="w-3 h-3" />
+                View
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/project/${project.slug}/edit-layout`, '_blank')}
+                className="flex items-center gap-1"
+              >
+                <Layout className="w-3 h-3" />
+                Layout
+              </Button>
               <Button
                 variant="outline"
                 size="sm"

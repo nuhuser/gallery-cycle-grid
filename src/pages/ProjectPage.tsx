@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Download, Eye } from 'lucide-react';
 import { ModelViewer } from '@/components/ModelViewer';
 import { MediaCarousel } from '@/components/ui/media-carousel';
+import { ContentBlock } from '@/components/layout/ContentBlock';
 import { toast } from 'sonner';
 
 interface Project {
@@ -17,9 +18,10 @@ interface Project {
   hover_image: string;
   category: string;
   images: string[];
-  files: any;
+  files: any[];
   is_featured: boolean;
   slug: string;
+  layout?: any[];
 }
 
 const ProjectPage = () => {
@@ -43,7 +45,11 @@ const ProjectPage = () => {
         .single();
 
       if (error) throw error;
-      setProject(data);
+      setProject({
+        ...data,
+        files: Array.isArray(data.files) ? data.files : [],
+        layout: Array.isArray(data.layout) ? data.layout : []
+      });
       if (data?.cover_image) {
         setSelectedImage(data.cover_image);
       }
@@ -108,7 +114,7 @@ const ProjectPage = () => {
               </div>
             </div>
             
-            {project.description && (
+            {project.description && !project.layout?.length && (
               <div 
                 className="text-muted-foreground max-w-3xl leading-relaxed prose prose-sm"
                 dangerouslySetInnerHTML={{ __html: project.description }}
@@ -117,117 +123,132 @@ const ProjectPage = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Media Carousel */}
-          <div className="lg:col-span-2">
-            {(() => {
-              const mediaItems = [];
-              
-              // Add cover image
-              if (project.cover_image) {
-                mediaItems.push({
-                  url: project.cover_image,
-                  type: 'image' as const,
-                  name: 'Cover Image'
-                });
-              }
-              
-              // Add project images
-              if (project.images) {
-                project.images.forEach((image, index) => {
-                  mediaItems.push({
-                    url: image,
-                    type: 'image' as const,
-                    name: `Gallery Image ${index + 1}`
-                  });
-                });
-              }
-              
-              // Add video files from project files
-              if (project.files) {
-                project.files.forEach((file: any) => {
-                  if (file.type?.startsWith('video/') || file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)) {
-                    mediaItems.push({
-                      url: file.url,
-                      type: 'video' as const,
-                      name: file.name || 'Video File'
-                    });
-                  }
-                });
-              }
-              
-              return mediaItems.length > 0 ? (
-                <MediaCarousel 
-                  items={mediaItems}
-                  aspectRatio="16/9"
-                  className="w-full"
+        {/* Custom Layout or Default Content */}
+        {project.layout && project.layout.length > 0 ? (
+          // Custom article layout
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-8">
+              {project.layout.map((block: any) => (
+                <ContentBlock
+                  key={block.id}
+                  block={block}
+                  isEditing={false}
                 />
-              ) : (
-                <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
-                  <p className="text-muted-foreground">No media available</p>
-                </div>
-              );
-            })()}
+              ))}
+            </div>
           </div>
+        ) : (
+          // Default layout with media carousel and files
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Media Carousel */}
+            <div className="lg:col-span-2">
+              {(() => {
+                const mediaItems = [];
+                
+                // Add cover image
+                if (project.cover_image) {
+                  mediaItems.push({
+                    url: project.cover_image,
+                    type: 'image' as const,
+                    name: 'Cover Image'
+                  });
+                }
+                
+                // Add project images
+                if (project.images) {
+                  project.images.forEach((image, index) => {
+                    mediaItems.push({
+                      url: image,
+                      type: 'image' as const,
+                      name: `Gallery Image ${index + 1}`
+                    });
+                  });
+                }
+                
+                // Add video files from project files
+                if (project.files) {
+                  project.files.forEach((file: any) => {
+                    if (file.type?.startsWith('video/') || file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)) {
+                      mediaItems.push({
+                        url: file.url,
+                        type: 'video' as const,
+                        name: file.name || 'Video File'
+                      });
+                    }
+                  });
+                }
+                
+                return mediaItems.length > 0 ? (
+                  <MediaCarousel 
+                    items={mediaItems}
+                    aspectRatio="16/9"
+                    className="w-full"
+                  />
+                ) : (
+                  <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
+                    <p className="text-muted-foreground">No media available</p>
+                  </div>
+                );
+              })()}
+            </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Non-Media Files */}
-            {project.files && project.files.filter((file: any) => 
-              !file.type?.startsWith('video/') && 
-              !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
-            ).length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Project Files</h3>
-                <div className="space-y-2">
-                  {project.files
-                    .filter((file: any) => 
-                      !file.type?.startsWith('video/') && 
-                      !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
-                    )
-                    .map((file: any, index: number) => (
-                    <div key={index} className="border border-border rounded p-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-sm">{file.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Non-Media Files */}
+              {project.files && project.files.filter((file: any) => 
+                !file.type?.startsWith('video/') && 
+                !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
+              ).length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3">Project Files</h3>
+                  <div className="space-y-2">
+                    {project.files
+                      .filter((file: any) => 
+                        !file.type?.startsWith('video/') && 
+                        !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
+                      )
+                      .map((file: any, index: number) => (
+                      <div key={index} className="border border-border rounded p-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-sm">{file.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Unknown size'}
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {is3DFile(file) && (
+                          <div className="flex gap-2">
+                            {is3DFile(file) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedImage(file.url)}
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedImage(file.url)}
+                              onClick={() => window.open(file.url, '_blank')}
                             >
-                              <Eye className="w-3 h-3" />
+                              <Download className="w-3 h-3" />
                             </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(file.url, '_blank')}
-                          >
-                            <Download className="w-3 h-3" />
-                          </Button>
+                          </div>
                         </div>
+                        
+                        {is3DFile(file) && selectedImage === file.url && (
+                          <div className="mt-4">
+                            <ModelViewer modelUrl={file.url} />
+                          </div>
+                        )}
                       </div>
-                      
-                      {is3DFile(file) && selectedImage === file.url && (
-                        <div className="mt-4">
-                          <ModelViewer modelUrl={file.url} />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

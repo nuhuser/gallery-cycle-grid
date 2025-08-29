@@ -92,6 +92,7 @@ export type Database = {
           id: string
           images: string[] | null
           is_featured: boolean | null
+          layout: Json | null
           slug: string | null
           title: string
           updated_at: string
@@ -108,6 +109,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_featured?: boolean | null
+          layout?: Json | null
           slug?: string | null
           title: string
           updated_at?: string
@@ -124,6 +126,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_featured?: boolean | null
+          layout?: Json | null
           slug?: string | null
           title?: string
           updated_at?: string
