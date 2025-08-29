@@ -9,13 +9,13 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Portfolio Theme - Courier Prime Typography */
-    --background: 45 15% 97%;
+    --background: 60 11% 94.5%;
     --foreground: 0 0% 13%;
 
-    --card: 45 15% 98%;
+    --card: 60 11% 95%;
     --card-foreground: 0 0% 13%;
 
-    --popover: 45 15% 98%;
+    --popover: 60 11% 95%;
     --popover-foreground: 0 0% 13%;
 
     --primary: 0 0% 13%;
