@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Download, Eye } from 'lucide-react';
 import { ModelViewer } from '@/components/ModelViewer';
+import { MediaCarousel } from '@/components/ui/media-carousel';
 import { toast } from 'sonner';
 
 interface Project {
@@ -101,85 +102,92 @@ const ProjectPage = () => {
             </div>
             
             <div className="flex items-center gap-4 text-muted-foreground">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {new Date(project.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {project.date}
               </div>
             </div>
             
             {project.description && (
-              <p className="text-muted-foreground max-w-3xl leading-relaxed">
-                {project.description}
-              </p>
+              <div 
+                className="text-muted-foreground max-w-3xl leading-relaxed prose prose-sm"
+                dangerouslySetInnerHTML={{ __html: project.description }}
+              />
             )}
           </div>
         </div>
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Image */}
+          {/* Main Media Carousel */}
           <div className="lg:col-span-2">
-            {selectedImage && (
-              <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-                <img
-                  src={selectedImage}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
+            {(() => {
+              const mediaItems = [];
+              
+              // Add cover image
+              if (project.cover_image) {
+                mediaItems.push({
+                  url: project.cover_image,
+                  type: 'image' as const,
+                  name: 'Cover Image'
+                });
+              }
+              
+              // Add project images
+              if (project.images) {
+                project.images.forEach((image, index) => {
+                  mediaItems.push({
+                    url: image,
+                    type: 'image' as const,
+                    name: `Gallery Image ${index + 1}`
+                  });
+                });
+              }
+              
+              // Add video files from project files
+              if (project.files) {
+                project.files.forEach((file: any) => {
+                  if (file.type?.startsWith('video/') || file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)) {
+                    mediaItems.push({
+                      url: file.url,
+                      type: 'video' as const,
+                      name: file.name || 'Video File'
+                    });
+                  }
+                });
+              }
+              
+              return mediaItems.length > 0 ? (
+                <MediaCarousel 
+                  items={mediaItems}
+                  aspectRatio="16/9"
+                  className="w-full"
                 />
-              </div>
-            )}
+              ) : (
+                <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
+                  <p className="text-muted-foreground">No media available</p>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Image Gallery */}
-            {project.images && project.images.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">Gallery</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {project.cover_image && (
-                    <button
-                      onClick={() => setSelectedImage(project.cover_image)}
-                      className={`aspect-square rounded overflow-hidden ${
-                        selectedImage === project.cover_image ? 'ring-2 ring-primary' : ''
-                      }`}
-                    >
-                      <img
-                        src={project.cover_image}
-                        alt="Cover"
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      />
-                    </button>
-                  )}
-                  {project.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(image)}
-                      className={`aspect-square rounded overflow-hidden ${
-                        selectedImage === image ? 'ring-2 ring-primary' : ''
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`Gallery ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Files */}
-            {project.files && project.files.length > 0 && (
+            {/* Non-Media Files */}
+            {project.files && project.files.filter((file: any) => 
+              !file.type?.startsWith('video/') && 
+              !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
+            ).length > 0 && (
               <div>
                 <h3 className="font-semibold mb-3">Project Files</h3>
                 <div className="space-y-2">
-                  {project.files.map((file: any, index: number) => (
+                  {project.files
+                    .filter((file: any) => 
+                      !file.type?.startsWith('video/') && 
+                      !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
+                    )
+                    .map((file: any, index: number) => (
                     <div key={index} className="border border-border rounded p-3">
                       <div className="flex items-center justify-between">
                         <div>

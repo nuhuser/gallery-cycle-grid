@@ -230,7 +230,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="min-h-[100px]">
         <EditorContent 
           editor={editor} 
-          className="prose max-w-none"
+          className="prose max-w-none [&_.ProseMirror]:p-4 [&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:whitespace-pre-wrap"
         />
       </div>
     </div>
