@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -33,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth event:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -74,6 +77,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+
+      toast.success('Password reset email sent! Check your inbox.');
+      return true;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      toast.error('Failed to send reset email');
+      return false;
+    }
+  };
+
   const logout = async (): Promise<void> => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -84,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, session, isAuthenticated, login, resetPassword, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
