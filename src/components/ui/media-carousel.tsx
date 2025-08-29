@@ -91,10 +91,12 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
             <video
               ref={videoRef}
               src={currentItem.url}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               loop
               muted
               playsInline
+              autoPlay
+              controls
               onClick={togglePlayPause}
             />
             
