@@ -1,9 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Upload, X, FileText, Box } from 'lucide-react';
+import { Upload, X, FileText, Box, CloudUpload, Image as ImageIcon } from 'lucide-react';
+import { validateImageFile } from '@/utils/validation';
+import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface FileUploadProps {
   images: string[];
@@ -20,6 +22,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragType, setDragType] = useState<'images' | 'files' | null>(null);
 
   const uploadFile = async (file: File, folder: string): Promise<string> => {
     const fileExt = file.name.split('.').pop();
@@ -39,17 +43,70 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     return data.publicUrl;
   };
 
+  const validateFiles = (files: FileList, type: 'images' | 'files'): File[] => {
+    const validFiles: File[] = [];
+    const maxFiles = 10;
+    
+    if (files.length > maxFiles) {
+      toast.error(`You can only upload up to ${maxFiles} files at once`);
+      return [];
+    }
+
+    Array.from(files).forEach((file) => {
+      if (type === 'images') {
+        const validationError = validateImageFile(file);
+        if (validationError) {
+          toast.error(`${file.name}: ${validationError}`);
+          return;
+        }
+      } else {
+        // Validate other file types
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+          toast.error(`${file.name}: File size must be less than 50MB`);
+          return;
+        }
+        
+        const allowedTypes = [
+          'application/pdf', 'text/plain', 'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        
+        const allowedExtensions = ['.stl', '.obj', '.3ds', '.fbx', '.dae'];
+        const hasAllowedExtension = allowedExtensions.some(ext => 
+          file.name.toLowerCase().endsWith(ext)
+        );
+        
+        if (!allowedTypes.includes(file.type) && !hasAllowedExtension) {
+          toast.error(`${file.name}: File type not supported`);
+          return;
+        }
+      }
+      validFiles.push(file);
+    });
+
+    return validFiles;
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (!selectedFiles) return;
 
+    const validFiles = validateFiles(selectedFiles, 'images');
+    if (validFiles.length === 0) return;
+
     try {
-      const uploadPromises = Array.from(selectedFiles).map(file => 
-        uploadFile(file, 'images')
-      );
-      
+      const uploadPromises = validFiles.map(file => uploadFile(file, 'images'));
       const uploadedUrls = await Promise.all(uploadPromises);
+      
       onImagesChange([...images, ...uploadedUrls]);
+      
+      // Log file uploads
+      await logAdminAction(AUDIT_ACTIONS.FILE_UPLOAD, 'images', undefined, {
+        file_count: uploadedUrls.length,
+        file_names: validFiles.map(f => f.name),
+      });
+      
       toast.success(`${uploadedUrls.length} image(s) uploaded successfully`);
     } catch (error) {
       console.error('Upload error:', error);
@@ -61,8 +118,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const selectedFiles = event.target.files;
     if (!selectedFiles) return;
 
+    const validFiles = validateFiles(selectedFiles, 'files');
+    if (validFiles.length === 0) return;
+
     try {
-      const uploadPromises = Array.from(selectedFiles).map(async (file) => {
+      const uploadPromises = validFiles.map(async (file) => {
         const url = await uploadFile(file, 'documents');
         return {
           name: file.name,
@@ -74,12 +134,96 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       
       const uploadedFiles = await Promise.all(uploadPromises);
       onFilesChange([...files, ...uploadedFiles]);
+      
+      // Log file uploads
+      await logAdminAction(AUDIT_ACTIONS.FILE_UPLOAD, 'documents', undefined, {
+        file_count: uploadedFiles.length,
+        file_names: validFiles.map(f => f.name),
+      });
+      
       toast.success(`${uploadedFiles.length} file(s) uploaded successfully`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload files');
     }
   };
+
+  // Drag and Drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent, type: 'images' | 'files') => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragType(type);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only set dragging to false if we're leaving the drop zone entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+      setDragType(null);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent, type: 'images' | 'files') => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setDragType(null);
+
+    const droppedFiles = e.dataTransfer.files;
+    if (!droppedFiles || droppedFiles.length === 0) return;
+
+    const validFiles = validateFiles(droppedFiles, type);
+    if (validFiles.length === 0) return;
+
+    try {
+      if (type === 'images') {
+        const uploadPromises = validFiles.map(file => uploadFile(file, 'images'));
+        const uploadedUrls = await Promise.all(uploadPromises);
+        onImagesChange([...images, ...uploadedUrls]);
+        
+        await logAdminAction(AUDIT_ACTIONS.FILE_UPLOAD, 'images', undefined, {
+          file_count: uploadedUrls.length,
+          file_names: validFiles.map(f => f.name),
+          upload_method: 'drag_drop',
+        });
+        
+        toast.success(`${uploadedUrls.length} image(s) uploaded successfully`);
+      } else {
+        const uploadPromises = validFiles.map(async (file) => {
+          const url = await uploadFile(file, 'documents');
+          return {
+            name: file.name,
+            url,
+            type: file.type,
+            size: file.size
+          };
+        });
+        
+        const uploadedFiles = await Promise.all(uploadPromises);
+        onFilesChange([...files, ...uploadedFiles]);
+        
+        await logAdminAction(AUDIT_ACTIONS.FILE_UPLOAD, 'documents', undefined, {
+          file_count: uploadedFiles.length,
+          file_names: validFiles.map(f => f.name),
+          upload_method: 'drag_drop',
+        });
+        
+        toast.success(`${uploadedFiles.length} file(s) uploaded successfully`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(`Failed to upload ${type}`);
+    }
+  }, [images, files, onImagesChange, onFilesChange]);
 
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
@@ -101,19 +245,61 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Image Gallery Upload */}
+      {/* Image Gallery Upload with Drag & Drop */}
       <div className="space-y-4">
         <Label>Project Images</Label>
-        <div className="flex items-center gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => imageInputRef.current?.click()}
-            className="flex items-center gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Images
-          </Button>
+        
+        {/* Drag & Drop Zone for Images */}
+        <div
+          className={`
+            relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer
+            ${isDragging && dragType === 'images' 
+              ? 'border-primary bg-primary/5 scale-102' 
+              : 'border-border hover:border-primary/50 hover:bg-accent/50'
+            }
+          `}
+          onDragEnter={(e) => handleDragEnter(e, 'images')}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'images')}
+          onClick={() => imageInputRef.current?.click()}
+        >
+          <div className="flex flex-col items-center gap-4">
+            {isDragging && dragType === 'images' ? (
+              <CloudUpload className="w-12 h-12 text-primary animate-bounce" />
+            ) : (
+              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+            )}
+            
+            <div className="space-y-2">
+              <h3 className="font-medium">
+                {isDragging && dragType === 'images' 
+                  ? 'Drop images here' 
+                  : 'Upload Project Images'
+                }
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Drag and drop images here, or click to browse
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Supports: JPEG, PNG, WebP, GIF (max 10MB each)
+              </p>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                imageInputRef.current?.click();
+              }}
+            >
+              <Upload className="w-4 h-4" />
+              Browse Images
+            </Button>
+          </div>
+          
           <input
             ref={imageInputRef}
             type="file"
@@ -131,13 +317,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 <img
                   src={image}
                   alt={`Project image ${index + 1}`}
-                  className="w-full h-24 object-cover rounded"
+                  className="w-full h-24 object-cover rounded border"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="sm"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0"
                   onClick={() => removeImage(index)}
                 >
                   <X className="w-3 h-3" />
@@ -148,23 +334,65 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         )}
       </div>
 
-      {/* File Upload */}
+      {/* File Upload with Drag & Drop */}
       <div className="space-y-4">
         <Label>Additional Files (PDF, STL, OBJ, etc.)</Label>
-        <div className="flex items-center gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Files
-          </Button>
+        
+        {/* Drag & Drop Zone for Files */}
+        <div
+          className={`
+            relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer
+            ${isDragging && dragType === 'files' 
+              ? 'border-primary bg-primary/5 scale-102' 
+              : 'border-border hover:border-primary/50 hover:bg-accent/50'
+            }
+          `}
+          onDragEnter={(e) => handleDragEnter(e, 'files')}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'files')}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="flex flex-col items-center gap-4">
+            {isDragging && dragType === 'files' ? (
+              <CloudUpload className="w-12 h-12 text-primary animate-bounce" />
+            ) : (
+              <FileText className="w-12 h-12 text-muted-foreground" />
+            )}
+            
+            <div className="space-y-2">
+              <h3 className="font-medium">
+                {isDragging && dragType === 'files' 
+                  ? 'Drop files here' 
+                  : 'Upload Additional Files'
+                }
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Drag and drop files here, or click to browse
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Supports: PDF, DOC, STL, OBJ, TXT (max 50MB each)
+              </p>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+            >
+              <Upload className="w-4 h-4" />
+              Browse Files
+            </Button>
+          </div>
+          
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.stl,.obj,.doc,.docx,.txt"
+            accept=".pdf,.stl,.obj,.doc,.docx,.txt,.3ds,.fbx,.dae"
             multiple
             onChange={handleFileUpload}
             className="hidden"
@@ -174,7 +402,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         {files.length > 0 && (
           <div className="space-y-2">
             {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border border-border rounded">
+              <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg bg-card">
                 <div className="flex items-center gap-3">
                   {getFileIcon(file)}
                   <div>
@@ -189,6 +417,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => removeFile(index)}
+                  className="text-muted-foreground hover:text-destructive"
                 >
                   <X className="w-4 h-4" />
                 </Button>
