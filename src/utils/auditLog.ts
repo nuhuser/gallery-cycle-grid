@@ -42,20 +42,22 @@ export const logAdminAction = async (
       action,
       resource: `${resourceType}:${resourceId || 'N/A'}`,
       timestamp: new Date().toISOString(),
+      details,
     });
 
-    // In a production environment, you would send this to a logging service
-    // For now, we'll store it locally or send to an audit endpoint
-    await supabase.from('audit_logs').insert([{
-      action: logEntry.action,
-      resource_type: logEntry.resource_type,
-      resource_id: logEntry.resource_id,
-      user_id: logEntry.user_id,
-      details: logEntry.details,
-      ip_address: logEntry.ip_address,
-      user_agent: logEntry.user_agent,
-      created_at: new Date().toISOString(),
-    }]).select().single();
+    // Store audit log in browser's local storage for client-side tracking
+    const auditLogs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
+    auditLogs.push({
+      ...logEntry,
+      timestamp: new Date().toISOString(),
+    });
+    
+    // Keep only the last 100 entries to prevent storage bloat
+    if (auditLogs.length > 100) {
+      auditLogs.splice(0, auditLogs.length - 100);
+    }
+    
+    localStorage.setItem('audit_logs', JSON.stringify(auditLogs));
 
   } catch (error) {
     console.error('Failed to log admin action:', error);

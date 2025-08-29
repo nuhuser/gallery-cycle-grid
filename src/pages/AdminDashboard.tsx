@@ -7,6 +7,7 @@ import { ProjectForm } from '@/components/admin/ProjectForm';
 import { ProjectList } from '@/components/admin/ProjectList';
 import { toast } from 'sonner';
 import { Plus, LogOut } from 'lucide-react';
+import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface Project {
   id: string;
@@ -35,6 +36,9 @@ const AdminDashboard = () => {
       navigate('/admin');
       return;
     }
+    
+    // Log admin dashboard access
+    logAdminAction(AUDIT_ACTIONS.ADMIN_ACCESS, 'dashboard');
     fetchProjects();
   }, [isAuthenticated, navigate]);
 
@@ -56,6 +60,8 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = async () => {
+    // Log logout action before actually logging out
+    await logAdminAction(AUDIT_ACTIONS.USER_LOGOUT, 'user');
     await logout();
     navigate('/admin');
   };
@@ -75,12 +81,21 @@ const AdminDashboard = () => {
     if (!confirm('Are you sure you want to delete this project?')) return;
 
     try {
+      const projectToDelete = projects.find(p => p.id === projectId);
+      
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', projectId);
 
       if (error) throw error;
+      
+      // Log deletion action
+      await logAdminAction(AUDIT_ACTIONS.PROJECT_DELETE, 'project', projectId, {
+        title: projectToDelete?.title,
+        category: projectToDelete?.category,
+      });
+      
       toast.success('Project deleted successfully');
       fetchProjects();
     } catch (error) {

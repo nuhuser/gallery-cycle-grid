@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface AuthContextType {
   user: User | null;
@@ -82,6 +83,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
+        // Log successful login
+        setTimeout(() => {
+          logAdminAction(AUDIT_ACTIONS.USER_LOGIN, 'user', data.user?.id, {
+            email: data.user?.email,
+          });
+        }, 0);
+        
         toast.success('Logged in successfully');
         return true;
       }
