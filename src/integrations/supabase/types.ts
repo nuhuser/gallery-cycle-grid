@@ -14,36 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
+          category: string | null
           cover_image: string | null
           created_at: string
           date: string
           description: string | null
+          files: Json | null
+          hover_image: string | null
           id: string
           images: string[] | null
+          is_featured: boolean | null
+          slug: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          category?: string | null
           cover_image?: string | null
           created_at?: string
           date?: string
           description?: string | null
+          files?: Json | null
+          hover_image?: string | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
+          slug?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          category?: string | null
           cover_image?: string | null
           created_at?: string
           date?: string
           description?: string | null
+          files?: Json | null
+          hover_image?: string | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
+          slug?: string | null
           title?: string
           updated_at?: string
           user_id?: string
