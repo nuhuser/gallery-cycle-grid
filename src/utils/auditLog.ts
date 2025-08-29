@@ -45,19 +45,35 @@ export const logAdminAction = async (
       details,
     });
 
-    // Store audit log in browser's local storage for client-side tracking
-    const auditLogs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
-    auditLogs.push({
-      ...logEntry,
-      timestamp: new Date().toISOString(),
-    });
-    
-    // Keep only the last 100 entries to prevent storage bloat
-    if (auditLogs.length > 100) {
-      auditLogs.splice(0, auditLogs.length - 100);
+    // Store audit log in database for proper tracking
+    const { error: insertError } = await supabase
+      .from('audit_logs')
+      .insert([{
+        action: logEntry.action,
+        resource_type: logEntry.resource_type,
+        resource_id: logEntry.resource_id,
+        user_id: logEntry.user_id,
+        details: logEntry.details,
+        ip_address: logEntry.ip_address,
+        user_agent: logEntry.user_agent,
+      }]);
+
+    if (insertError) {
+      console.error('Failed to insert audit log:', insertError);
+      // Fallback to localStorage if database insert fails
+      const auditLogs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
+      auditLogs.push({
+        ...logEntry,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Keep only the last 100 entries to prevent storage bloat
+      if (auditLogs.length > 100) {
+        auditLogs.splice(0, auditLogs.length - 100);
+      }
+      
+      localStorage.setItem('audit_logs', JSON.stringify(auditLogs));
     }
-    
-    localStorage.setItem('audit_logs', JSON.stringify(auditLogs));
 
   } catch (error) {
     console.error('Failed to log admin action:', error);
