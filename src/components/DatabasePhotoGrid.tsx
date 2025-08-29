@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,6 +20,7 @@ interface Project {
 }
 
 export const DatabasePhotoGrid = () => {
+  const { isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
@@ -104,16 +106,18 @@ export const DatabasePhotoGrid = () => {
         </Link>
       ))}
       
-      {/* Add Project Button - only visible to admins */}
-      <div className="photo-grid-item group cursor-pointer border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors duration-300 flex items-center justify-center">
-        <Link
-          to="/admin"
-          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-        >
-          <Plus className="w-8 h-8" />
-          <span className="text-sm font-medium">Add Project</span>
-        </Link>
-      </div>
+      {/* Add Project Button - only visible to authenticated admins */}
+      {isAuthenticated && (
+        <div className="photo-grid-item group cursor-pointer border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors duration-300 flex items-center justify-center">
+          <Link
+            to="/admin/dashboard"
+            className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Plus className="w-8 h-8" />
+            <span className="text-sm font-medium">Add Project</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
