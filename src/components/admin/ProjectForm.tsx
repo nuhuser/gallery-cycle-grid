@@ -4,12 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from './FileUpload';
+import { ImageDropZone } from './ImageDropZone';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
-import { X, Upload } from 'lucide-react';
 import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInput } from '@/utils/validation';
 import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
@@ -51,8 +51,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
   const hoverInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    // Sanitize string inputs
-    const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
+    // Sanitize string inputs (except for description which may contain HTML)
+    const sanitizedValue = typeof value === 'string' && field !== 'description' 
+      ? sanitizeInput(value) 
+      : value;
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
   };
 
@@ -74,10 +76,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     return data.publicUrl;
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'cover' | 'hover') => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const handleImageUpload = async (file: File, type: 'cover' | 'hover') => {
     // Validate file before upload
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -223,12 +222,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Project description"
-              rows={3}
+              onChange={(value) => handleInputChange('description', value)}
+              placeholder="Project description with rich formatting..."
             />
           </div>
 
@@ -237,9 +234,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
               <Label htmlFor="date">Date</Label>
               <Input
                 id="date"
-                type="date"
+                type="text"
                 value={formData.date}
                 onChange={(e) => handleInputChange('date', e.target.value)}
+                placeholder="e.g., Winter 2023, March 2024, Q1 2024"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -252,77 +250,23 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
             </div>
           </div>
 
-          {/* Cover Image Upload */}
-          <div className="space-y-2">
-            <Label>Cover Image</Label>
-            <div className="flex items-center gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => coverInputRef.current?.click()}
-                className="flex items-center gap-2"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Cover
-              </Button>
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'cover')}
-                className="hidden"
-              />
-              {coverImage && (
-                <div className="flex items-center gap-2">
-                  <img src={coverImage} alt="Cover" className="w-16 h-16 object-cover rounded" />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCoverImage('')}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Cover Image Upload with Drag & Drop */}
+          <ImageDropZone
+            label="Cover Image"
+            value={coverImage}
+            onChange={setCoverImage}
+            onFileSelect={(file) => handleImageUpload(file, 'cover')}
+            loading={loading}
+          />
 
-          {/* Hover Image Upload */}
-          <div className="space-y-2">
-            <Label>Hover Image</Label>
-            <div className="flex items-center gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => hoverInputRef.current?.click()}
-                className="flex items-center gap-2"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Hover Image
-              </Button>
-              <input
-                ref={hoverInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'hover')}
-                className="hidden"
-              />
-              {hoverImage && (
-                <div className="flex items-center gap-2">
-                  <img src={hoverImage} alt="Hover" className="w-16 h-16 object-cover rounded" />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setHoverImage('')}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Hover Image Upload with Drag & Drop */}
+          <ImageDropZone
+            label="Hover Image"
+            value={hoverImage}
+            onChange={setHoverImage}
+            onFileSelect={(file) => handleImageUpload(file, 'hover')}
+            loading={loading}
+          />
 
           {/* File Upload Component */}
           <FileUpload

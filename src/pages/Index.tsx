@@ -1,5 +1,6 @@
 import { HeroFrame } from '@/components/HeroFrame';
 import { DatabasePhotoGrid } from '@/components/DatabasePhotoGrid';
+import { FeaturedPhotoGrid } from '@/components/FeaturedPhotoGrid';
 import { Navigation } from '@/components/Navigation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,11 +29,9 @@ const Index = () => {
               <div className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                 Currently Featured
               </div>
-              <div className="space-y-3">
-                <h3 className="heading-large">Selected Works 2024</h3>
-                <p className="text-base text-muted-foreground">
-                  Architecture • Digital Art • Interior Design
-                </p>
+              <div className="space-y-4">
+                <h3 className="heading-large">Selected Works</h3>
+                <FeaturedPhotoGrid />
               </div>
             </div>
           </div>
@@ -47,7 +46,7 @@ const Index = () => {
       {/* Projects Grid Section */}
       <section id="work" className="py-16">
         <div className="mb-12">
-          <h2 className="heading-large mb-4">Recent Projects</h2>
+          <h2 className="heading-large mb-4">Projects</h2>
           <p className="text-muted-foreground max-w-2xl">
             Exploring the intersection of form, function, and visual storytelling across multiple disciplines.
           </p>

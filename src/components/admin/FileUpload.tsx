@@ -45,12 +45,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   const validateFiles = (files: FileList, type: 'images' | 'files'): File[] => {
     const validFiles: File[] = [];
-    const maxFiles = 10;
-    
-    if (files.length > maxFiles) {
-      toast.error(`You can only upload up to ${maxFiles} files at once`);
-      return [];
-    }
+    // No file count or size limits for drag and drop
 
     Array.from(files).forEach((file) => {
       if (type === 'images') {
@@ -60,19 +55,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           return;
         }
       } else {
-        // Validate other file types
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (file.size > maxSize) {
-          toast.error(`${file.name}: File size must be less than 50MB`);
-          return;
-        }
-        
+        // Validate other file types - now including video
         const allowedTypes = [
           'application/pdf', 'text/plain', 'application/msword',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime'
         ];
         
-        const allowedExtensions = ['.stl', '.obj', '.3ds', '.fbx', '.dae'];
+        const allowedExtensions = ['.stl', '.obj', '.3ds', '.fbx', '.dae', '.mp4', '.webm', '.mov', '.avi'];
         const hasAllowedExtension = allowedExtensions.some(ext => 
           file.name.toLowerCase().endsWith(ext)
         );
@@ -371,7 +361,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 Drag and drop files here, or click to browse
               </p>
               <p className="text-xs text-muted-foreground">
-                Supports: PDF, DOC, STL, OBJ, TXT (max 50MB each)
+                Supports: PDF, DOC, STL, OBJ, TXT, MP4, WEBM, MOV, AVI
               </p>
             </div>
             
@@ -392,7 +382,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.stl,.obj,.doc,.docx,.txt,.3ds,.fbx,.dae"
+            accept=".pdf,.stl,.obj,.doc,.docx,.txt,.3ds,.fbx,.dae,.mp4,.webm,.mov,.avi"
             multiple
             onChange={handleFileUpload}
             className="hidden"

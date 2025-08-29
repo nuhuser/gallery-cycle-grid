@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Project {
@@ -19,34 +17,33 @@ interface Project {
   slug: string;
 }
 
-export const DatabasePhotoGrid = () => {
-  const { isAuthenticated } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
+export const FeaturedPhotoGrid = () => {
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProjects();
+    fetchFeaturedProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchFeaturedProjects = async () => {
     try {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
 
       if (error) throw error;
-      setProjects(data || []);
+      setFeaturedProjects(data || []);
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      toast.error('Failed to fetch projects');
+      console.error('Error fetching featured projects:', error);
+      toast.error('Failed to fetch featured projects');
     } finally {
       setLoading(false);
     }
   };
-
-  const featuredProjects = projects.filter(project => project.is_featured);
 
   const preloadProjectPage = (slug: string) => {
     // Preload the project page for instant navigation
@@ -59,7 +56,7 @@ export const DatabasePhotoGrid = () => {
   if (loading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-        {[...Array(6)].map((_, index) => (
+        {[...Array(3)].map((_, index) => (
           <div
             key={index}
             className="aspect-square bg-muted rounded-lg animate-pulse"
@@ -69,9 +66,17 @@ export const DatabasePhotoGrid = () => {
     );
   }
 
+  if (featuredProjects.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No featured projects yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-      {projects.map((project, index) => (
+      {featuredProjects.slice(0, 6).map((project, index) => (
         <Link
           key={project.id}
           to={`/project/${project.slug}`}
@@ -110,19 +115,6 @@ export const DatabasePhotoGrid = () => {
           </div>
         </Link>
       ))}
-      
-      {/* Add Project Button - only visible to authenticated admins */}
-      {isAuthenticated && (
-        <div className="photo-grid-item group cursor-pointer border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors duration-300 flex items-center justify-center">
-          <Link
-            to="/admin/dashboard"
-            className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Plus className="w-8 h-8" />
-            <span className="text-sm font-medium">Add Project</span>
-          </Link>
-        </div>
-      )}
     </div>
   );
 };

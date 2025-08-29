@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ProjectForm } from '@/components/admin/ProjectForm';
 import { ProjectList } from '@/components/admin/ProjectList';
 import { toast } from 'sonner';
-import { Plus, LogOut } from 'lucide-react';
+import { Plus, LogOut, Home, ArrowLeft } from 'lucide-react';
 import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface Project {
@@ -119,6 +119,14 @@ const AdminDashboard = () => {
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <div className="flex gap-4">
             <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              View Site
+            </Button>
+            <Button 
               onClick={() => setShowProjectForm(true)}
               className="flex items-center gap-2"
             >
@@ -135,14 +143,27 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {showProjectForm ? (
-          <ProjectForm
-            project={editingProject}
-            onSave={handleProjectSaved}
-            onCancel={() => {
-              setShowProjectForm(false);
-              setEditingProject(null);
-            }}
-          />
+          <div className="space-y-4">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowProjectForm(false);
+                setEditingProject(null);
+              }}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Projects
+            </Button>
+            <ProjectForm
+              project={editingProject}
+              onSave={handleProjectSaved}
+              onCancel={() => {
+                setShowProjectForm(false);
+                setEditingProject(null);
+              }}
+            />
+          </div>
         ) : (
           <ProjectList
             projects={projects}
