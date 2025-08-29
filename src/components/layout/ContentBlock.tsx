@@ -1,19 +1,21 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, X, Edit, Image, FileText, Play } from 'lucide-react';
+import { GripVertical, X, Edit, Image, FileText, Play, Grid, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface ContentBlockData {
   id: string;
-  type: 'text' | 'image' | 'video' | 'spacer';
+  type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid' | 'carousel';
   content?: string;
   url?: string;
   alt?: string;
   caption?: string;
   size?: 'small' | 'medium' | 'large' | 'full';
   alignment?: 'left' | 'center' | 'right';
+  images?: Array<{ url: string; alt?: string; caption?: string }>;
+  gridColumns?: number;
 }
 
 interface ContentBlockProps {
@@ -165,6 +167,79 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                 <div className="text-center">
                   <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to add video</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'photo-grid':
+        return (
+          <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
+            {block.images && block.images.length > 0 ? (
+              <div 
+                className={cn(
+                  "grid gap-4 rounded-lg",
+                  block.gridColumns === 2 ? "grid-cols-2" : 
+                  block.gridColumns === 4 ? "grid-cols-2 md:grid-cols-4" : 
+                  "grid-cols-2 md:grid-cols-3"
+                )}
+              >
+                {block.images.map((img, index) => (
+                  <div key={index} className="space-y-2">
+                    <img
+                      src={img.url}
+                      alt={img.alt || ''}
+                      className="w-full h-auto rounded-lg object-cover"
+                    />
+                    {img.caption && (
+                      <p className="text-sm text-muted-foreground text-center italic">
+                        {img.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <Grid className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Click to add photo grid</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'carousel':
+        return (
+          <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
+            {block.images && block.images.length > 0 ? (
+              <div className="space-y-4">
+                <div className="overflow-x-auto">
+                  <div className="flex gap-4 pb-4">
+                    {block.images.map((img, index) => (
+                      <div key={index} className="flex-shrink-0 w-64 space-y-2">
+                        <img
+                          src={img.url}
+                          alt={img.alt || ''}
+                          className="w-full h-48 rounded-lg object-cover"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground text-center italic">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <RotateCcw className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Click to add carousel</p>
                 </div>
               </div>
             )}

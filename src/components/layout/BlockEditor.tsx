@@ -8,6 +8,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { ContentBlockData } from './ContentBlock';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 
 interface BlockEditorProps {
   block: ContentBlockData;
@@ -85,7 +86,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       </div>
 
       {/* Size and Alignment Controls */}
-      {(block.type === 'text' || block.type === 'image' || block.type === 'video') && (
+      {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid' || block.type === 'carousel') && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Size</Label>
@@ -205,6 +206,112 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
                 onChange={(e) => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
                 placeholder="Describe the image for accessibility..."
               />
+            </div>
+          )}
+        </div>
+      )}
+
+      {(block.type === 'photo-grid' || block.type === 'carousel') && (
+        <div className="space-y-4">
+          {/* Grid Columns (for photo-grid) */}
+          {block.type === 'photo-grid' && (
+            <div>
+              <Label>Grid Columns</Label>
+              <Select
+                value={editedBlock.gridColumns?.toString() || '3'}
+                onValueChange={(value) => setEditedBlock(prev => ({ ...prev, gridColumns: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 Columns</SelectItem>
+                  <SelectItem value="3">3 Columns</SelectItem>
+                  <SelectItem value="4">4 Columns</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Images Selection */}
+          <div>
+            <Label>Select Images from Project</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto">
+              {projectImages.map((imageUrl, index) => {
+                const isSelected = editedBlock.images?.some(img => img.url === imageUrl);
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const currentImages = editedBlock.images || [];
+                      if (isSelected) {
+                        // Remove image
+                        setEditedBlock(prev => ({
+                          ...prev,
+                          images: currentImages.filter(img => img.url !== imageUrl)
+                        }));
+                      } else {
+                        // Add image
+                        setEditedBlock(prev => ({
+                          ...prev,
+                          images: [...currentImages, { url: imageUrl, alt: '', caption: '' }]
+                        }));
+                      }
+                    }}
+                    className={`aspect-square rounded overflow-hidden border-2 ${
+                      isSelected ? 'border-primary' : 'border-border hover:border-border/60'
+                    }`}
+                  >
+                    <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Edit selected images */}
+          {editedBlock.images && editedBlock.images.length > 0 && (
+            <div>
+              <Label>Edit Image Details</Label>
+              <div className="space-y-3 mt-2 max-h-64 overflow-y-auto">
+                {editedBlock.images.map((img, index) => (
+                  <div key={index} className="border rounded p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <img src={img.url} alt="" className="w-12 h-12 object-cover rounded" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditedBlock(prev => ({
+                            ...prev,
+                            images: prev.images?.filter((_, i) => i !== index)
+                          }));
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="Alt text"
+                      value={img.alt || ''}
+                      onChange={(e) => {
+                        const newImages = [...(editedBlock.images || [])];
+                        newImages[index] = { ...newImages[index], alt: e.target.value };
+                        setEditedBlock(prev => ({ ...prev, images: newImages }));
+                      }}
+                    />
+                    <Input
+                      placeholder="Caption"
+                      value={img.caption || ''}
+                      onChange={(e) => {
+                        const newImages = [...(editedBlock.images || [])];
+                        newImages[index] = { ...newImages[index], caption: e.target.value };
+                        setEditedBlock(prev => ({ ...prev, images: newImages }));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

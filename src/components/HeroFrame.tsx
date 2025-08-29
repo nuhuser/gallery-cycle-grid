@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import hero1 from '@/assets/hero-1.jpg';
 import hero2 from '@/assets/hero-2.jpg';
 import hero3 from '@/assets/hero-3.jpg';
 
-const heroImages = [
+interface Project {
+  id: string;
+  title: string;
+  category: string;
+  cover_image: string;
+  hover_image?: string;
+  slug: string;
+}
+
+const fallbackImages = [
   {
     src: hero1,
     title: 'Architectural Studies',
@@ -24,6 +34,38 @@ const heroImages = [
 export const HeroFrame = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
+  const [heroImages, setHeroImages] = useState(fallbackImages);
+
+  useEffect(() => {
+    fetchFeaturedProjects();
+  }, []);
+
+  const fetchFeaturedProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, title, category, cover_image, hover_image, slug')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const projectImages = data.map(project => ({
+          src: project.hover_image || project.cover_image,
+          title: project.title,
+          category: project.category || 'Portfolio'
+        }));
+        setHeroImages(projectImages);
+        setFeaturedProjects(data);
+      }
+    } catch (error) {
+      console.error('Error fetching featured projects:', error);
+      // Keep fallback images if fetch fails
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,7 +77,7 @@ export const HeroFrame = () => {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   const currentImage = heroImages[currentIndex];
 

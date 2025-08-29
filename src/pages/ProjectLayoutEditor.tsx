@@ -28,7 +28,9 @@ import {
   Play, 
   Minus,
   Eye,
-  Save
+  Save,
+  Grid,
+  RotateCcw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -101,14 +103,16 @@ const ProjectLayoutEditor = () => {
 
   const generateBlockId = () => `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  const addBlock = (type: 'text' | 'image' | 'video' | 'spacer') => {
+  const addBlock = (type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid' | 'carousel') => {
     const newBlock: ContentBlockData = {
       id: generateBlockId(),
       type,
       size: 'medium',
       alignment: 'center',
       ...(type === 'text' && { content: '<p>Your text here...</p>' }),
-      ...(type === 'spacer' && { content: '40' })
+      ...(type === 'spacer' && { content: '40' }),
+      ...(type === 'photo-grid' && { images: [], gridColumns: 3 }),
+      ...(type === 'carousel' && { images: [] })
     };
 
     setLayout(prev => [...prev, newBlock]);
@@ -241,6 +245,22 @@ const ProjectLayoutEditor = () => {
                   >
                     <Play className="w-4 h-4 mr-2" />
                     Video Block
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => addBlock('photo-grid')}
+                  >
+                    <Grid className="w-4 h-4 mr-2" />
+                    Photo Grid
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => addBlock('carousel')}
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Carousel
                   </Button>
                   <Button
                     variant="outline"
