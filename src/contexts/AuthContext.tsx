@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface AuthContextType {
+  user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -20,31 +23,50 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isAuthenticated = !!session?.user;
+
   useEffect(() => {
-    // Check if user is logged in (simple session check)
-    const adminSession = localStorage.getItem('admin_session');
-    if (adminSession) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // For demo purposes, we'll use a simple hardcoded admin login
-      // In production, you'd implement proper password hashing and verification
-      if (email === 'admin@nuhali.xyz' && password === 'admin123') {
-        localStorage.setItem('admin_session', 'true');
-        setIsAuthenticated(true);
-        toast.success('Logged in successfully');
-        return true;
-      } else {
-        toast.error('Invalid credentials');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast.error(error.message);
         return false;
       }
+
+      if (data.user) {
+        toast.success('Logged in successfully');
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       toast.error('Login failed');
@@ -53,13 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async (): Promise<void> => {
-    localStorage.removeItem('admin_session');
-    setIsAuthenticated(false);
-    toast.success('Logged out successfully');
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error('Logout failed');
+    } else {
+      toast.success('Logged out successfully');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, session, isAuthenticated, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

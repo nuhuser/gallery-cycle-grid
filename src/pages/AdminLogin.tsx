@@ -31,7 +31,7 @@ const AdminLogin = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the admin dashboard
+            Enter your admin credentials to access the dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -43,7 +43,7 @@ const AdminLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@nuhali.xyz"
+                placeholder="your@email.com"
                 required
               />
             </div>

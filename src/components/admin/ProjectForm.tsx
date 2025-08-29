@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +32,7 @@ interface ProjectFormProps {
 }
 
 export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCancel }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
@@ -98,6 +100,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
       return;
     }
 
+    if (!user) {
+      toast.error('You must be logged in to create projects');
+      return;
+    }
+
     setLoading(true);
     try {
       const projectData = {
@@ -106,7 +113,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
         hover_image: hoverImage,
         images,
         files,
-        user_id: '00000000-0000-0000-0000-000000000000', // Placeholder for public projects
+        user_id: user.id, // Use the authenticated user's ID
       };
 
       if (project) {
