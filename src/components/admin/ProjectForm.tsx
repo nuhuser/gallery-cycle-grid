@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from './FileUpload';
 import { toast } from 'sonner';
 import { X, Upload } from 'lucide-react';
+import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInput } from '@/utils/validation';
+import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface Project {
   id: string;
@@ -49,7 +51,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
   const hoverInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Sanitize string inputs
+    const sanitizedValue = typeof value === 'string' ? sanitizeInput(value) : value;
+    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
   };
 
   const uploadFile = async (file: File, path: string): Promise<string> => {
@@ -74,6 +78,13 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file before upload
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
     try {
       setLoading(true);
       const url = await uploadFile(file, type === 'cover' ? 'covers' : 'hovers');
@@ -83,6 +94,14 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
       } else {
         setHoverImage(url);
       }
+      
+      // Log file upload for audit
+      await logAdminAction(AUDIT_ACTIONS.FILE_UPLOAD, 'image', undefined, {
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        upload_type: type,
+      });
       
       toast.success(`${type === 'cover' ? 'Cover' : 'Hover'} image uploaded successfully`);
     } catch (error) {
@@ -95,8 +114,23 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title) {
-      toast.error('Title is required');
+    
+    // Enhanced validation
+    const titleError = validateTitle(formData.title);
+    if (titleError) {
+      toast.error(titleError);
+      return;
+    }
+
+    const descriptionError = validateDescription(formData.description);
+    if (descriptionError) {
+      toast.error(descriptionError);
+      return;
+    }
+
+    const categoryError = validateCategory(formData.category);
+    if (categoryError) {
+      toast.error(categoryError);
       return;
     }
 
@@ -122,12 +156,30 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
           .update(projectData)
           .eq('id', project.id);
         if (error) throw error;
+        
+        // Log update action
+        await logAdminAction(AUDIT_ACTIONS.PROJECT_UPDATE, 'project', project.id, {
+          title: formData.title,
+          category: formData.category,
+          is_featured: formData.is_featured,
+        });
+        
         toast.success('Project updated successfully');
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('projects')
-          .insert([projectData]);
+          .insert([projectData])
+          .select('id')
+          .single();
         if (error) throw error;
+        
+        // Log creation action
+        await logAdminAction(AUDIT_ACTIONS.PROJECT_CREATE, 'project', data.id, {
+          title: formData.title,
+          category: formData.category,
+          is_featured: formData.is_featured,
+        });
+        
         toast.success('Project created successfully');
       }
 
