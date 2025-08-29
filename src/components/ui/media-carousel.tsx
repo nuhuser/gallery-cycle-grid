@@ -64,9 +64,13 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
       // Auto-play video when it becomes current
       if (isVideo) {
-        video.play().catch(() => {
-          // Autoplay failed, user interaction required
-        });
+        try {
+          video.muted = true;
+          video.load();
+          void video.play();
+        } catch (e) {
+          // Autoplay may be blocked
+        }
       }
 
       return () => {
@@ -83,20 +87,28 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
     <div className={cn("relative group", className)}>
       {/* Main Media Display */}
       <div 
-        className="relative overflow-hidden rounded-lg bg-muted"
-        style={{ aspectRatio }}
+        className="relative rounded-lg bg-muted"
       >
         {isVideo ? (
-          <div className="relative w-full h-full">
+          <div key={currentIndex} className="relative w-full animate-fade-in flex items-center justify-center">
             <video
+              key={currentIndex}
               ref={videoRef}
               src={currentItem.url}
-              className="w-full h-full object-contain"
+              className="w-full h-auto max-h-[80vh] object-contain"
               loop
               muted
               playsInline
               autoPlay
               controls
+              onLoadedData={() => {
+                if (videoRef.current) {
+                  try {
+                    videoRef.current.currentTime = 0;
+                    videoRef.current.play();
+                  } catch {}
+                }
+              }}
               onClick={togglePlayPause}
             />
             
@@ -120,7 +132,7 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
           <img
             src={currentItem.url}
             alt={currentItem.name || `Media ${currentIndex + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-auto max-h-[80vh] object-contain mx-auto"
           />
         )}
 

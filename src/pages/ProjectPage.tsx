@@ -181,7 +181,7 @@ const ProjectPage = () => {
                 return mediaItems.length > 0 ? (
                   <MediaCarousel 
                     items={mediaItems}
-                    aspectRatio="16/9"
+                    aspectRatio="natural"
                     className="w-full"
                   />
                 ) : (
