@@ -139,9 +139,9 @@ const ProjectPage = () => {
           </div>
         ) : (
           // Default layout with media carousel and files
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="flex flex-col lg:flex-row gap-8">
             {/* Main Media Carousel */}
-            <div className="lg:col-span-2">
+            <div className="lg:w-3/4">
               {(() => {
                 const mediaItems = [];
                 
@@ -193,7 +193,7 @@ const ProjectPage = () => {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="lg:w-1/4 space-y-6">
               {/* Non-Media Files */}
               {project.files && project.files.filter((file: any) => 
                 !file.type?.startsWith('video/') && 

@@ -62,13 +62,20 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
       video.addEventListener('pause', handlePause);
       video.addEventListener('ended', handleEnded);
 
+      // Auto-play video when it becomes current
+      if (isVideo) {
+        video.play().catch(() => {
+          // Autoplay failed, user interaction required
+        });
+      }
+
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
         video.removeEventListener('ended', handleEnded);
       };
     }
-  }, [currentIndex]);
+  }, [currentIndex, isVideo]);
 
   if (!items.length) return null;
 
@@ -111,7 +118,7 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
           <img
             src={currentItem.url}
             alt={currentItem.name || `Media ${currentIndex + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         )}
 
@@ -156,10 +163,10 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
                 setIsPlaying(false);
               }}
               className={cn(
-                "relative flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all",
+                "relative flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all duration-300 ease-out",
                 index === currentIndex
-                  ? "border-primary"
-                  : "border-transparent hover:border-border"
+                  ? "border-primary scale-110"
+                  : "border-transparent hover:border-border hover:scale-105"
               )}
             >
               {item.type === 'video' ? (
