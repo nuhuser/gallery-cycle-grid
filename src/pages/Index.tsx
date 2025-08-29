@@ -16,18 +16,18 @@ const Index = () => {
               <h1 className="heading-display">
                 Nuh Ali
               </h1>
-              <p className="text-base text-muted-foreground mt-6 max-w-md leading-relaxed">
+              <p className="text-lg text-muted-foreground mt-8 max-w-lg leading-relaxed">
                 A curated collection of visual narratives, design explorations, and creative endeavors.
               </p>
             </div>
             
-            <div className="space-y-4">
-              <div className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+            <div className="space-y-6">
+              <div className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                 Currently Featured
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="heading-large">Selected Works 2024</h3>
-                <p className="text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   Architecture • Digital Art • Interior Design
                 </p>
               </div>
