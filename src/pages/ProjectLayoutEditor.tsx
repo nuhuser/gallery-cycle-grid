@@ -118,7 +118,7 @@ const ProjectLayoutEditor = () => {
 
   const generateBlockId = () => `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  const addBlock = (type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid' | 'carousel') => {
+  const addBlock = (type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid') => {
     const newBlock: ContentBlockData = {
       id: generateBlockId(),
       type,
@@ -126,8 +126,7 @@ const ProjectLayoutEditor = () => {
       alignment: 'center',
       ...(type === 'text' && { content: '<p>Your text here...</p>' }),
       ...(type === 'spacer' && { content: '40' }),
-      ...(type === 'photo-grid' && { images: [], gridColumns: 3 }),
-      ...(type === 'carousel' && { images: [] })
+      ...(type === 'photo-grid' && { images: [], gridColumns: 3 })
     };
 
     setLayout(prev => [...prev, newBlock]);
@@ -272,14 +271,6 @@ const ProjectLayoutEditor = () => {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => addBlock('carousel')}
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Carousel
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
                     onClick={() => addBlock('spacer')}
                   >
                     <Minus className="w-4 h-4 mr-2" />
@@ -330,6 +321,11 @@ const ProjectLayoutEditor = () => {
                           isEditing={true}
                           onEdit={setEditingBlock}
                           onDelete={deleteBlock}
+                          onUpdateBlock={(updatedBlock) => {
+                            setLayout(prev => prev.map(b => 
+                              b.id === updatedBlock.id ? updatedBlock : b
+                            ));
+                          }}
                         />
                       ))}
                     </div>

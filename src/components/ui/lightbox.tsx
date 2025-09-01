@@ -92,16 +92,13 @@ export const Lightbox: React.FC<LightboxProps> = ({
         </>
       )}
 
-      {/* Main Content Area */}
-      <div className="flex w-full h-full">
-        {/* Image Container */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <img
-            src={images[currentIndex]}
-            alt={`Image ${currentIndex + 1} of ${images.length}`}
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
+      {/* Main Content Area - Centered */}
+      <div className="absolute inset-0 flex items-center justify-center p-16">
+        <img
+          src={images[currentIndex]}
+          alt={`Image ${currentIndex + 1} of ${images.length}`}
+          className="max-w-full max-h-full object-contain shadow-2xl"
+        />
       </div>
 
       {/* Image Counter */}

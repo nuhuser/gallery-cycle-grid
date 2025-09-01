@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X, Edit, Image, FileText, Play, Grid, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { InlineTextEditor } from './InlineTextEditor';
 
 export interface ContentBlockData {
   id: string;
@@ -23,14 +24,17 @@ interface ContentBlockProps {
   isEditing?: boolean;
   onEdit?: (block: ContentBlockData) => void;
   onDelete?: (id: string) => void;
+  onUpdateBlock?: (block: ContentBlockData) => void;
 }
 
 export const ContentBlock: React.FC<ContentBlockProps> = ({
   block,
   isEditing = false,
   onEdit,
-  onDelete
+  onDelete,
+  onUpdateBlock
 }) => {
+  const [isEditingText, setIsEditingText] = useState(false);
   const {
     attributes,
     listeners,
@@ -90,17 +94,53 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
     return url;
   };
 
+  const handleTextSave = (newContent: string) => {
+    if (onUpdateBlock) {
+      onUpdateBlock({ ...block, content: newContent });
+    }
+    setIsEditingText(false);
+  };
+
+  const handleTextCancel = () => {
+    setIsEditingText(false);
+  };
+
   const renderBlockContent = () => {
     switch (block.type) {
       case 'text':
+        if (isEditing && isEditingText) {
+          return (
+            <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
+              <InlineTextEditor
+                value={block.content || '<p>Enter your text here...</p>'}
+                onChange={(content) => {
+                  // Update block content in real-time for preview
+                  if (onUpdateBlock) {
+                    onUpdateBlock({ ...block, content });
+                  }
+                }}
+                onSave={handleTextSave}
+                onCancel={handleTextCancel}
+              />
+            </div>
+          );
+        }
+        
         return (
           <div 
             className={cn(
-              "prose prose-sm max-w-none",
+              "prose prose-sm max-w-none cursor-text min-h-[40px] p-2 rounded hover:bg-muted/30 transition-colors",
               getSizeClass(block.size),
-              getAlignmentClass(block.alignment)
+              getAlignmentClass(block.alignment),
+              isEditing && "border border-dashed border-muted-foreground/30"
             )}
-            dangerouslySetInnerHTML={{ __html: block.content || '<p>Click to edit text...</p>' }}
+            dangerouslySetInnerHTML={{ __html: block.content || '<p class="text-muted-foreground">Click to edit text...</p>' }}
+            onClick={(e) => {
+              if (isEditing) {
+                e.stopPropagation();
+                setIsEditingText(true);
+              }
+            }}
           />
         );
       
@@ -305,7 +345,16 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
       )}
 
       {/* Block Content */}
-      <div className={cn("cursor-pointer")} onClick={() => onEdit?.(block)}>
+      <div 
+        className={cn(
+          block.type === 'text' && isEditing ? "" : "cursor-pointer"
+        )} 
+        onClick={() => {
+          if (block.type !== 'text' || !isEditing) {
+            onEdit?.(block);
+          }
+        }}
+      >
         {renderBlockContent()}
       </div>
     </div>
