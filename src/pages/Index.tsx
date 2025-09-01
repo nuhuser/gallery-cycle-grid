@@ -24,16 +24,6 @@ const Index = () => {
                 A curated collection of visual narratives, design explorations, and creative endeavors.
               </p>
             </div>
-            
-            <div className="space-y-6">
-              <div className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
-                Currently Featured
-              </div>
-              <div className="space-y-4">
-                <h3 className="heading-large">Selected Works</h3>
-                <FeaturedPhotoGrid />
-              </div>
-            </div>
           </div>
 
           {/* Right side - Hero cycling frame */}
