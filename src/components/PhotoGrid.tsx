@@ -51,27 +51,21 @@ export const PhotoGrid = () => {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2">
         {gridItems.map((item, index) => (
           <div
             key={index}
-            className="photo-grid-item group cursor-pointer"
-            style={{ animationDelay: `${index * 100}ms` }}
+            className="relative aspect-square cursor-pointer group overflow-hidden"
             onClick={() => handleImageClick(index)}
           >
             <img
               src={item.src}
               alt={item.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-              <div className="text-center text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
-                <p className="text-xs text-white/80">{item.category}</p>
-              </div>
-            </div>
+            {/* Subtle hover overlay */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
           </div>
         ))}
       </div>

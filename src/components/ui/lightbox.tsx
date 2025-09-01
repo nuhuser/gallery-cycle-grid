@@ -57,63 +57,59 @@ export const Lightbox: React.FC<LightboxProps> = ({
 
   return (
     <div className={cn(
-      "fixed inset-0 z-50 flex items-center justify-center",
+      "fixed inset-0 z-50 flex items-center justify-center bg-white",
       className
     )}>
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+      {/* Close Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-6 right-6 z-20 hover:bg-gray-100 rounded-full w-10 h-10"
         onClick={onClose}
-      />
-      
-      {/* Content */}
-      <div className="relative z-10 max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-        {/* Close Button */}
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute top-4 right-4 z-20 bg-background/80 hover:bg-background/90"
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+      >
+        <X className="h-5 w-5 text-gray-600" />
+      </Button>
 
-        {/* Navigation Arrows */}
-        {images.length > 1 && (
-          <>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90"
-              onClick={goToPrevious}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-background/80 hover:bg-background/90"
-              onClick={goToNext}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
+      {/* Navigation Arrows */}
+      {images.length > 1 && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 hover:bg-gray-100 rounded-full w-12 h-12"
+            onClick={goToPrevious}
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-600" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 hover:bg-gray-100 rounded-full w-12 h-12"
+            onClick={goToNext}
+          >
+            <ChevronRight className="h-6 w-6 text-gray-600" />
+          </Button>
+        </>
+      )}
 
-        {/* Image */}
-        <img
-          src={images[currentIndex]}
-          alt={`Image ${currentIndex + 1} of ${images.length}`}
-          className="max-w-full max-h-full object-contain rounded-lg"
-        />
-
-        {/* Image Counter */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 text-foreground px-3 py-1 rounded text-sm">
-            {currentIndex + 1} / {images.length}
-          </div>
-        )}
+      {/* Main Content Area */}
+      <div className="flex w-full h-full">
+        {/* Image Container */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <img
+            src={images[currentIndex]}
+            alt={`Image ${currentIndex + 1} of ${images.length}`}
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
       </div>
+
+      {/* Image Counter */}
+      {images.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gray-100 text-gray-800 px-4 py-2 rounded-full text-sm font-medium">
+          {currentIndex + 1} / {images.length}
+        </div>
+      )}
     </div>
   );
 };
