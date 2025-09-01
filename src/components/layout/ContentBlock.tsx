@@ -8,7 +8,7 @@ import { InlineTextEditor } from './InlineTextEditor';
 
 export interface ContentBlockData {
   id: string;
-  type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid' | 'carousel';
+  type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid';
   content?: string;
   url?: string;
   alt?: string;
@@ -251,40 +251,6 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
           </div>
         );
       
-      case 'carousel':
-        return (
-          <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
-            {block.images && block.images.length > 0 ? (
-              <div className="space-y-4">
-                <div className="overflow-x-auto">
-                  <div className="flex gap-4 pb-4">
-                    {block.images.map((img, index) => (
-                      <div key={index} className="flex-shrink-0 w-64 space-y-2">
-                        <img
-                          src={img.url}
-                          alt={img.alt || ''}
-                          className="w-full h-48 rounded-lg object-cover"
-                        />
-                        {img.caption && (
-                          <p className="text-sm text-muted-foreground text-center italic">
-                            {img.caption}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <RotateCcw className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to add carousel</p>
-                </div>
-              </div>
-            )}
-          </div>
-        );
       
       case 'spacer':
         return (

@@ -86,7 +86,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       </div>
 
       {/* Size and Alignment Controls */}
-      {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid' || block.type === 'carousel') && (
+      {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid') && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Size</Label>
@@ -211,7 +211,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       )}
 
-      {(block.type === 'photo-grid' || block.type === 'carousel') && (
+      {block.type === 'photo-grid' && (
         <div className="space-y-4">
           {/* Grid Columns (for photo-grid) */}
           {block.type === 'photo-grid' && (

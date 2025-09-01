@@ -22,7 +22,7 @@ export const generateInitialLayout = (project: ProjectData): ContentBlockData[] 
     });
   }
 
-  // Add media carousel if images exist
+  // Add photo grid if images exist
   const mediaItems = [];
   
   // Add cover image
@@ -37,9 +37,10 @@ export const generateInitialLayout = (project: ProjectData): ContentBlockData[] 
 
   if (mediaItems.length > 0) {
     layout.push({
-      id: `carousel-${Date.now()}`,
-      type: 'carousel',
+      id: `photo-grid-${Date.now()}`,
+      type: 'photo-grid',
       images: mediaItems.map(url => ({ url, alt: '', caption: '' })),
+      gridColumns: 3,
       size: 'full',
       alignment: 'center'
     });
