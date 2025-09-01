@@ -36,7 +36,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
   onUpdateBlock
 }) => {
   const [isEditingText, setIsEditingText] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const {
     attributes,
     listeners,
@@ -233,7 +233,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                       src={img.url}
                       alt={img.alt || ''}
                       className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
-                      onClick={() => setSelectedImage(img.url)}
+                      onClick={() => setSelectedImageIndex(index)}
                     />
                     {img.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -330,12 +330,12 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
       </div>
 
       {/* Lightbox for images */}
-      {selectedImage && (
+      {selectedImageIndex !== null && block.images && (
         <Lightbox
-          images={[selectedImage]}
-          initialIndex={0}
+          images={block.images.map(img => img.url)}
+          initialIndex={selectedImageIndex}
           isOpen={true}
-          onClose={() => setSelectedImage(null)}
+          onClose={() => setSelectedImageIndex(null)}
         />
       )}
     </div>
