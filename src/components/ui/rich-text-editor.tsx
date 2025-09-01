@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
+import Paragraph from '@tiptap/extension-paragraph';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -33,7 +34,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: false,
+      }),
+      Paragraph.configure({
+        HTMLAttributes: {
+          class: 'mb-4 last:mb-0',
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -230,7 +238,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="min-h-[100px]">
         <EditorContent 
           editor={editor} 
-          className="prose max-w-none [&_.ProseMirror]:p-4 [&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:whitespace-pre-wrap"
+          className="prose max-w-none [&_.ProseMirror]:p-4 [&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:leading-relaxed [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p:last-child]:mb-0"
         />
       </div>
     </div>

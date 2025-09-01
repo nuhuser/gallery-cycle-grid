@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { Lightbox } from '@/components/ui/lightbox';
 import grid1 from '@/assets/grid-1.jpg';
 import grid2 from '@/assets/grid-2.jpg';
 import grid3 from '@/assets/grid-3.jpg';
@@ -39,29 +41,47 @@ const gridItems = [
 ];
 
 export const PhotoGrid = () => {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setLightboxOpen(true);
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-      {gridItems.map((item, index) => (
-        <div
-          key={index}
-          className="photo-grid-item group cursor-pointer"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          <img
-            src={item.src}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="text-center text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-              <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
-              <p className="text-xs text-white/80">{item.category}</p>
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        {gridItems.map((item, index) => (
+          <div
+            key={index}
+            className="photo-grid-item group cursor-pointer"
+            style={{ animationDelay: `${index * 100}ms` }}
+            onClick={() => handleImageClick(index)}
+          >
+            <img
+              src={item.src}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+              <div className="text-center text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
+                <p className="text-xs text-white/80">{item.category}</p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      
+      <Lightbox
+        images={gridItems.map(item => item.src)}
+        initialIndex={selectedImageIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+    </>
   );
 };

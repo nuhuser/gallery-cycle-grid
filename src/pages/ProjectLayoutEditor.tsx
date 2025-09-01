@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { generateInitialLayout } from '@/utils/projectLayout';
 import { ContentBlock, ContentBlockData } from '@/components/layout/ContentBlock';
 import { BlockEditor } from '@/components/layout/BlockEditor';
 import { 
@@ -91,7 +92,21 @@ const ProjectLayoutEditor = () => {
         files: Array.isArray(data.files) ? data.files : [],
         layout: layoutData
       });
-      setLayout(layoutData);
+      
+      // Auto-generate layout if none exists
+      if (layoutData.length === 0) {
+        const projectForLayout = {
+          title: data.title,
+          description: data.description,
+          cover_image: data.cover_image,
+          images: data.images || [],
+          files: Array.isArray(data.files) ? data.files : []
+        };
+        const autoLayout = generateInitialLayout(projectForLayout);
+        setLayout(autoLayout);
+      } else {
+        setLayout(layoutData);
+      }
     } catch (error) {
       console.error('Error fetching project:', error);
       toast.error('Failed to load project');
