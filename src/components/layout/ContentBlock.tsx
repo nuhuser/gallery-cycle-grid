@@ -5,6 +5,7 @@ import { GripVertical, X, Edit, Image, FileText, Play, Grid, RotateCcw } from 'l
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { InlineTextEditor } from './InlineTextEditor';
+import { Lightbox } from '@/components/ui/lightbox';
 
 export interface ContentBlockData {
   id: string;
@@ -35,6 +36,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
   onUpdateBlock
 }) => {
   const [isEditingText, setIsEditingText] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const {
     attributes,
     listeners,
@@ -219,23 +221,26 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
             {block.images && block.images.length > 0 ? (
               <div 
                 className={cn(
-                  "grid gap-4 rounded-lg",
+                  "grid gap-1 overflow-hidden",
                   block.gridColumns === 2 ? "grid-cols-2" : 
                   block.gridColumns === 4 ? "grid-cols-2 md:grid-cols-4" : 
                   "grid-cols-2 md:grid-cols-3"
                 )}
               >
                 {block.images.map((img, index) => (
-                  <div key={index} className="space-y-2">
+                  <div key={index} className="relative group overflow-hidden">
                     <img
                       src={img.url}
                       alt={img.alt || ''}
-                      className="w-full h-auto rounded-lg object-cover"
+                      className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
+                      onClick={() => setSelectedImage(img.url)}
                     />
                     {img.caption && (
-                      <p className="text-sm text-muted-foreground text-center italic">
-                        {img.caption}
-                      </p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <p className="text-xs text-center">
+                          {img.caption}
+                        </p>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -323,6 +328,16 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
       >
         {renderBlockContent()}
       </div>
+
+      {/* Lightbox for images */}
+      {selectedImage && (
+        <Lightbox
+          images={[selectedImage]}
+          initialIndex={0}
+          isOpen={true}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
     </div>
   );
 };
