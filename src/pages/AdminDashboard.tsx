@@ -17,6 +17,7 @@ interface Project {
   cover_image: string;
   hover_image: string;
   category: string;
+  company: string;
   images: string[];
   files: any;
   is_featured: boolean;

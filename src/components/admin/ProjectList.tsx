@@ -11,10 +11,13 @@ interface Project {
   cover_image: string;
   hover_image: string;
   category: string;
+  company: string;
   images: string[];
   files: any[];
   is_featured: boolean;
   slug: string;
+  logo_url: string;
+  logo_link: string;
 }
 
 interface ProjectListProps {
@@ -94,11 +97,18 @@ export const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDe
                     <Star className="w-4 h-4 text-yellow-500 fill-current" />
                   )}
                 </CardTitle>
-                {project.category && (
-                  <Badge variant="secondary" className="mt-2">
-                    {project.category}
-                  </Badge>
-                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {project.category && (
+                    <Badge variant="secondary">
+                      {project.category}
+                    </Badge>
+                  )}
+                  {project.company && (
+                    <Badge variant="outline">
+                      {project.company}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </CardHeader>

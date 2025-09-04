@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from './FileUpload';
 import { ImageDropZone } from './ImageDropZone';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -21,12 +22,18 @@ interface Project {
   cover_image: string;
   hover_image: string;
   category: string;
+  company: string;
   images: string[];
   files: any[];
   is_featured: boolean;
   slug: string;
   logo_url: string;
   logo_link: string;
+}
+
+interface CompanyOption {
+  name: string;
+  logo_url: string;
 }
 
 interface ProjectFormProps {
@@ -42,6 +49,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     description: project?.description || '',
     date: project?.date || new Date().toISOString().split('T')[0],
     category: project?.category || '',
+    company: project?.company || '',
     is_featured: project?.is_featured || false,
     logo_link: project?.logo_link || '',
   });
@@ -51,12 +59,48 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
   const [images, setImages] = useState<string[]>(project?.images || []);
   const [files, setFiles] = useState<any[]>(project?.files || []);
   const [loading, setLoading] = useState(false);
+  const [companies, setCompanies] = useState<CompanyOption[]>([]);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const hoverInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch existing companies on component mount
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('company, logo_url')
+        .not('company', 'is', null)
+        .not('company', 'eq', '')
+        .not('logo_url', 'is', null)
+        .not('logo_url', 'eq', '');
+      
+      if (!error && data) {
+        // Get unique companies with their logos
+        const uniqueCompanies = data.reduce((acc: CompanyOption[], item) => {
+          const existing = acc.find(c => c.name === item.company);
+          if (!existing) {
+            acc.push({ name: item.company, logo_url: item.logo_url });
+          }
+          return acc;
+        }, []);
+        setCompanies(uniqueCompanies);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     // Store the value directly without sanitization during typing
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // If company is selected from dropdown, auto-populate logo
+    if (field === 'company' && typeof value === 'string') {
+      const selectedCompany = companies.find(c => c.name === value);
+      if (selectedCompany && selectedCompany.logo_url) {
+        setLogoImage(selectedCompany.logo_url);
+      }
+    }
   };
 
   const uploadFile = async (file: File, path: string): Promise<string> => {
@@ -143,11 +187,12 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
 
     setLoading(true);
     try {
-     const projectData = {
+      const projectData = {
         title: sanitizeInputForSubmit(formData.title),
         description: formData.description, // Don't sanitize rich text description
         date: sanitizeInputForSubmit(formData.date),
         category: formatCategory(sanitizeInputForSubmit(formData.category)),
+        company: formData.company ? sanitizeInputForSubmit(formData.company) : null,
         logo_link: formData.logo_link ? sanitizeInputForSubmit(formData.logo_link) : '',
         is_featured: formData.is_featured,
         cover_image: coverImage,
@@ -234,7 +279,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -253,6 +298,29 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
                 onChange={(e) => handleInputChange('category', e.target.value)}
                 placeholder="e.g., Architecture, Digital Art"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company</Label>
+              <div className="space-y-2">
+                <Select value={formData.company} onValueChange={(value) => handleInputChange('company', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select existing company or type new" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.name} value={company.name}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="company"
+                  value={formData.company}
+                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  placeholder="Or type new company name"
+                />
+              </div>
             </div>
           </div>
 

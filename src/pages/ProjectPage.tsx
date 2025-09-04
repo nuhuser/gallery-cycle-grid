@@ -17,6 +17,7 @@ interface Project {
   cover_image: string;
   hover_image: string;
   category: string;
+  company?: string;
   images: string[];
   files: any[];
   is_featured: boolean;
@@ -130,9 +131,14 @@ const ProjectPage = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <h1 className="heading-large">{project.title}</h1>
-              {project.category && (
-                <Badge variant="secondary">{project.category}</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {project.category && (
+                  <Badge variant="secondary">{project.category}</Badge>
+                )}
+                {project.company && (
+                  <Badge variant="outline">{project.company}</Badge>
+                )}
+              </div>
             </div>
             
             <div className="flex items-center gap-4 text-muted-foreground">
