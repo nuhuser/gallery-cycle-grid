@@ -57,10 +57,10 @@ export const validateImageFile = (file: File): string | null => {
     return 'Image file size must be less than 10MB';
   }
   
-  // Only allow specific image types
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  // Only allow specific image types including SVG
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
   if (!allowedTypes.includes(file.type)) {
-    return 'Only JPEG, PNG, WebP, and GIF images are allowed';
+    return 'Only JPEG, PNG, WebP, GIF, and SVG images are allowed';
   }
   
   return null;
