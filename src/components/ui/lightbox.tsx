@@ -97,7 +97,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
         <img
           src={images[currentIndex]}
           alt={`Image ${currentIndex + 1} of ${images.length}`}
-          className="max-w-full max-h-full object-contain shadow-2xl"
+          className="h-[60vh] w-auto object-contain shadow-2xl"
         />
       </div>
 

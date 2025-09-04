@@ -88,16 +88,16 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
     <div className={cn("relative group", className)}>
       {/* Large Viewer */}
       <div 
-        className="relative rounded-lg bg-muted mb-4 cursor-pointer"
+        className="relative bg-muted mb-4 cursor-pointer flex items-center justify-center h-[60vh]"
         onClick={() => setShowLargeViewer(true)}
       >
         {isVideo ? (
-          <div key={currentIndex} className="relative w-full animate-fade-in flex items-center justify-center">
+          <div key={currentIndex} className="relative w-full h-full animate-fade-in flex items-center justify-center">
             <video
               key={currentIndex}
               ref={videoRef}
               src={currentItem.url}
-              className="w-full h-auto max-h-[80vh] object-contain"
+              className="max-w-full max-h-full object-contain"
               loop
               muted
               playsInline
@@ -134,7 +134,7 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
           <img
             src={currentItem.url}
             alt={currentItem.name || `Media ${currentIndex + 1}`}
-            className="w-full h-auto max-h-[60vh] object-contain mx-auto hover:opacity-90 transition-opacity"
+            className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
           />
         )}
 
@@ -209,7 +209,7 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
             {isVideo ? (
               <video
                 src={currentItem.url}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className="h-[60vh] w-auto object-contain"
                 controls
                 autoPlay
               />
@@ -217,7 +217,7 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
               <img
                 src={currentItem.url}
                 alt={currentItem.name || `Media ${currentIndex + 1}`}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className="h-[60vh] w-auto object-contain"
               />
             )}
             
