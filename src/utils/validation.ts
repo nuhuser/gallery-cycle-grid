@@ -37,13 +37,17 @@ export const validateCategory = (category: string): string | null => {
     return 'Category must be less than 100 characters';
   }
   
-  // Only allow alphanumeric, spaces, hyphens, and commas
-  const validPattern = /^[a-zA-Z0-9\s,-]*$/;
+  // Allow alphanumeric, spaces, hyphens, commas, and ampersands
+  const validPattern = /^[a-zA-Z0-9\s,&-]*$/;
   if (category && !validPattern.test(category)) {
     return 'Category contains invalid characters';
   }
   
   return null;
+};
+
+export const formatCategory = (category: string): string => {
+  return category.toUpperCase();
 };
 
 export const validateImageFile = (file: File): string | null => {

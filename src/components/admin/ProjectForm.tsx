@@ -10,7 +10,7 @@ import { FileUpload } from './FileUpload';
 import { ImageDropZone } from './ImageDropZone';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
-import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInputForSubmit } from '@/utils/validation';
+import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInputForSubmit, formatCategory } from '@/utils/validation';
 import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface Project {
@@ -147,7 +147,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
         title: sanitizeInputForSubmit(formData.title),
         description: formData.description, // Don't sanitize rich text description
         date: sanitizeInputForSubmit(formData.date),
-        category: sanitizeInputForSubmit(formData.category),
+        category: formatCategory(sanitizeInputForSubmit(formData.category)),
         logo_link: formData.logo_link ? sanitizeInputForSubmit(formData.logo_link) : '',
         is_featured: formData.is_featured,
         cover_image: coverImage,
