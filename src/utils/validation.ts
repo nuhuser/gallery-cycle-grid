@@ -64,8 +64,11 @@ export const validateImageFile = (file: File): string | null => {
 
 export const sanitizeInput = (input: string): string => {
   return input
-    .trim()
     .replace(/[<>]/g, '') // Remove angle brackets
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+\s*=/gi, ''); // Remove event handlers
+};
+
+export const sanitizeInputForSubmit = (input: string): string => {
+  return sanitizeInput(input).trim(); // Only trim on submit
 };

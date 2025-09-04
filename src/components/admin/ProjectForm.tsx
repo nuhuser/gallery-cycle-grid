@@ -10,7 +10,7 @@ import { FileUpload } from './FileUpload';
 import { ImageDropZone } from './ImageDropZone';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { toast } from 'sonner';
-import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInput } from '@/utils/validation';
+import { validateTitle, validateDescription, validateCategory, validateImageFile, sanitizeInputForSubmit } from '@/utils/validation';
 import { logAdminAction, AUDIT_ACTIONS } from '@/utils/auditLog';
 
 interface Project {
@@ -55,11 +55,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
   const hoverInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    // Sanitize string inputs (except for description which may contain HTML)
-    const sanitizedValue = typeof value === 'string' && field !== 'description' 
-      ? sanitizeInput(value) 
-      : value;
-    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+    // Store the value directly without sanitization during typing
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const uploadFile = async (file: File, path: string): Promise<string> => {
@@ -146,8 +143,13 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
 
     setLoading(true);
     try {
-      const projectData = {
-        ...formData,
+     const projectData = {
+        title: sanitizeInputForSubmit(formData.title),
+        description: formData.description, // Don't sanitize rich text description
+        date: sanitizeInputForSubmit(formData.date),
+        category: sanitizeInputForSubmit(formData.category),
+        logo_link: formData.logo_link ? sanitizeInputForSubmit(formData.logo_link) : '',
+        is_featured: formData.is_featured,
         cover_image: coverImage,
         hover_image: hoverImage,
         logo_url: logoImage,
