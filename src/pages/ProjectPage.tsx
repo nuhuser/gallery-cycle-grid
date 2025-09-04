@@ -22,6 +22,8 @@ interface Project {
   is_featured: boolean;
   slug: string;
   layout?: any[];
+  logo_url?: string;
+  logo_link?: string;
 }
 
 const ProjectPage = () => {
@@ -98,6 +100,32 @@ const ProjectPage = () => {
             <ArrowLeft className="w-4 h-4" />
             Back to projects
           </Link>
+          
+          {/* Project Logo */}
+          {project.logo_url && (
+            <div className="text-center mb-8">
+              {project.logo_link ? (
+                <a 
+                  href={project.logo_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block transition-transform hover:scale-105"
+                >
+                  <img 
+                    src={project.logo_url} 
+                    alt={`${project.title} Logo`}
+                    className="max-h-20 w-auto mx-auto object-contain"
+                  />
+                </a>
+              ) : (
+                <img 
+                  src={project.logo_url} 
+                  alt={`${project.title} Logo`}
+                  className="max-h-20 w-auto mx-auto object-contain"
+                />
+              )}
+            </div>
+          )}
           
           <div className="space-y-4">
             <div className="flex items-center gap-4">

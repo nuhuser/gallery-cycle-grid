@@ -21,6 +21,8 @@ interface Project {
   files: any;
   is_featured: boolean;
   slug: string;
+  logo_url: string;
+  logo_link: string;
 }
 
 const AdminDashboard = () => {

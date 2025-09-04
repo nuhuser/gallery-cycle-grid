@@ -93,6 +93,8 @@ export type Database = {
           images: string[] | null
           is_featured: boolean | null
           layout: Json | null
+          logo_link: string | null
+          logo_url: string | null
           slug: string | null
           title: string
           updated_at: string
@@ -110,6 +112,8 @@ export type Database = {
           images?: string[] | null
           is_featured?: boolean | null
           layout?: Json | null
+          logo_link?: string | null
+          logo_url?: string | null
           slug?: string | null
           title: string
           updated_at?: string
@@ -127,6 +131,8 @@ export type Database = {
           images?: string[] | null
           is_featured?: boolean | null
           layout?: Json | null
+          logo_link?: string | null
+          logo_url?: string | null
           slug?: string | null
           title?: string
           updated_at?: string

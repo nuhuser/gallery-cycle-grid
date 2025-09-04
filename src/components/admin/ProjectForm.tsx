@@ -25,6 +25,8 @@ interface Project {
   files: any[];
   is_featured: boolean;
   slug: string;
+  logo_url: string;
+  logo_link: string;
 }
 
 interface ProjectFormProps {
@@ -41,9 +43,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     date: project?.date || new Date().toISOString().split('T')[0],
     category: project?.category || '',
     is_featured: project?.is_featured || false,
+    logo_link: project?.logo_link || '',
   });
   const [coverImage, setCoverImage] = useState<string>(project?.cover_image || '');
   const [hoverImage, setHoverImage] = useState<string>(project?.hover_image || '');
+  const [logoImage, setLogoImage] = useState<string>(project?.logo_url || '');
   const [images, setImages] = useState<string[]>(project?.images || []);
   const [files, setFiles] = useState<any[]>(project?.files || []);
   const [loading, setLoading] = useState(false);
@@ -76,7 +80,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     return data.publicUrl;
   };
 
-  const handleImageUpload = async (file: File, type: 'cover' | 'hover') => {
+  const handleImageUpload = async (file: File, type: 'cover' | 'hover' | 'logo') => {
     // Validate file before upload
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -86,12 +90,14 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
 
     try {
       setLoading(true);
-      const url = await uploadFile(file, type === 'cover' ? 'covers' : 'hovers');
+      const url = await uploadFile(file, type === 'cover' ? 'covers' : type === 'hover' ? 'hovers' : 'logos');
       
       if (type === 'cover') {
         setCoverImage(url);
-      } else {
+      } else if (type === 'hover') {
         setHoverImage(url);
+      } else {
+        setLogoImage(url);
       }
       
       // Log file upload for audit
@@ -102,7 +108,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
         upload_type: type,
       });
       
-      toast.success(`${type === 'cover' ? 'Cover' : 'Hover'} image uploaded successfully`);
+      toast.success(`${type === 'cover' ? 'Cover' : type === 'hover' ? 'Hover' : 'Logo'} image uploaded successfully`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload image');
@@ -144,6 +150,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
         ...formData,
         cover_image: coverImage,
         hover_image: hoverImage,
+        logo_url: logoImage,
         images,
         files,
         user_id: user.id, // Use the authenticated user's ID
@@ -198,6 +205,33 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Project Logo Section */}
+          <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/10">
+            <div className="text-center">
+              <Label className="text-lg font-semibold">Project Logo</Label>
+              <p className="text-sm text-muted-foreground mt-1">Upload a logo that will appear at the top of your project page</p>
+            </div>
+            
+            <ImageDropZone
+              label="Logo Image"
+              value={logoImage}
+              onChange={setLogoImage}
+              onFileSelect={(file) => handleImageUpload(file, 'logo')}
+              loading={loading}
+            />
+            
+            <div className="space-y-2">
+              <Label htmlFor="logo_link">Logo Link (Optional)</Label>
+              <Input
+                id="logo_link"
+                value={formData.logo_link}
+                onChange={(e) => handleInputChange('logo_link', e.target.value)}
+                placeholder="https://example.com (optional hyperlink for the logo)"
+                type="url"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
