@@ -121,23 +121,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-courier antialiased;
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.6;
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 40px 24px;
+    padding: 48px 8px;
   }
 
   /* Typography System - Courier Prime */
   .heading-display {
-    @apply text-4xl md:text-6xl font-bold tracking-tight text-foreground;
+    @apply text-5xl md:text-7xl font-bold tracking-tight text-foreground;
     font-family: 'Courier Prime', 'Courier New', monospace;
     letter-spacing: -0.01em;
     line-height: 1.2;
   }
 
   .heading-large {
-    @apply text-2xl md:text-3xl font-bold tracking-tight;
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
     font-family: 'Courier Prime', 'Courier New', monospace;
     line-height: 1.3;
   }

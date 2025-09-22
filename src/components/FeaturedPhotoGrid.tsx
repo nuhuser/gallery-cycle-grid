@@ -55,7 +55,7 @@ export const FeaturedPhotoGrid = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
         {[...Array(3)].map((_, index) => (
           <div
             key={index}
@@ -75,7 +75,7 @@ export const FeaturedPhotoGrid = () => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
       {featuredProjects.slice(0, 6).map((project, index) => (
         <Link
           key={project.id}

@@ -12,15 +12,15 @@ const Index = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="pt-16 pb-12">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <section className="pt-20 pb-16">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           {/* Left side - Name and intro */}
           <div className="space-y-8 animate-slide-up">
             <div>
               <h1 className="heading-display">
                 Nuh Ali
               </h1>
-              <p className="text-lg text-muted-foreground mt-8 max-w-lg leading-relaxed">
+              <p className="text-xl text-muted-foreground mt-10 max-w-2xl leading-relaxed">
                 A curated collection of visual narratives, design explorations, and creative endeavors.
               </p>
             </div>
@@ -34,10 +34,10 @@ const Index = () => {
       </section>
 
       {/* Projects Grid Section */}
-      <section id="work" className="py-16">
-        <div className="mb-12">
-          <h2 className="heading-large mb-4">Projects</h2>
-          <p className="text-muted-foreground max-w-2xl">
+      <section id="work" className="py-20">
+        <div className="mb-16">
+          <h2 className="heading-large mb-6">Projects</h2>
+          <p className="text-lg text-muted-foreground max-w-3xl">
             Exploring the intersection of form, function, and visual storytelling across multiple disciplines.
           </p>
         </div>
