@@ -20,14 +20,11 @@ const Index = () => {
               <h1 className="heading-display">
                 Nuh Ali
               </h1>
-              <p className="text-xl text-muted-foreground mt-10 max-w-2xl leading-relaxed">
-                A curated collection of visual narratives, design explorations, and creative endeavors.
-              </p>
             </div>
           </div>
 
           {/* Right side - Hero cycling frame */}
-          <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="animate-fade-in lg:scale-125" style={{ animationDelay: '200ms' }}>
             <HeroFrame />
           </div>
         </div>

@@ -83,7 +83,7 @@ export const HeroFrame = () => {
 
   return (
     <div className="hero-frame rounded-xl overflow-hidden relative group">
-      <div className="aspect-[3/2] relative">
+      <div className="aspect-[4/3] relative">
         <img
           src={currentImage.src}
           alt={currentImage.title}
