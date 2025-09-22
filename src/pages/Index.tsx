@@ -11,8 +11,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Fullscreen Hero Section */}
-      <section className="relative h-screen w-full overflow-hidden">
+      {/* Fullscreen Hero Section - Edge to Edge */}
+      <section className="relative h-screen w-screen ml-[-8px] mr-[-8px] overflow-hidden">
         {/* Logo positioned in top left */}
         <div className="absolute top-8 left-8 z-20">
           <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">

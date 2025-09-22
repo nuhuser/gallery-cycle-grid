@@ -92,14 +92,14 @@ export const HeroFrame = () => {
           }`}
         />
         
-        {/* Overlay with project info */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Subtle overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent" />
         
-        <div className="absolute bottom-8 left-8 transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100">
-          <h3 className="text-white text-2xl font-semibold mb-2">
+        <div className="absolute bottom-8 left-8 transform transition-transform duration-500">
+          <h3 className="text-white text-3xl md:text-4xl font-semibold mb-2 drop-shadow-lg">
             {currentImage.title}
           </h3>
-          <p className="text-white/80 text-base font-medium">
+          <p className="text-white/90 text-lg font-medium drop-shadow-lg">
             {currentImage.category}
           </p>
         </div>
