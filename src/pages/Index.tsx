@@ -8,26 +8,23 @@ import { Settings } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Navigation />
       
-      {/* Fullscreen Hero Section - Edge to Edge */}
-      <section className="relative h-screen w-screen absolute top-0 left-0 overflow-hidden">
-        {/* Logo positioned in top left */}
-        <div className="absolute top-8 left-8 z-20">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
-            Nuh Ali
-          </h1>
-        </div>
+      {/* Fullscreen Hero Section - True Edge to Edge */}
+      <div className="fixed top-0 left-0 w-full h-full z-0">
+        <HeroFrame />
+      </div>
 
-        {/* Fullscreen Hero Frame */}
-        <div className="w-full h-full">
-          <HeroFrame />
-        </div>
-      </section>
+      {/* Logo positioned in top left */}
+      <div className="absolute top-8 left-8 z-20">
+        <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
+          Nuh Ali
+        </h1>
+      </div>
 
       {/* Projects Grid Section */}
-      <section id="work" className="py-20 mt-[100vh]">
+      <section id="work" className="relative z-10 bg-background py-20 mt-[100vh]">
         <div className="mb-16">
           <h2 className="heading-large mb-6">Projects</h2>
           <p className="text-lg text-muted-foreground max-w-3xl">
