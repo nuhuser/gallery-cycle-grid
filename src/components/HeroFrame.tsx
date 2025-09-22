@@ -80,9 +80,16 @@ export const HeroFrame = () => {
   }, [heroImages.length]);
 
   const currentImage = heroImages[currentIndex];
+  const currentProject = featuredProjects[currentIndex];
+
+  const handleImageClick = () => {
+    if (currentProject) {
+      window.location.href = `/project/${currentProject.slug}`;
+    }
+  };
 
   return (
-    <div className="w-full h-full relative group">
+    <div className="w-full h-full relative group cursor-pointer" onClick={handleImageClick}>
       <div className="w-full h-full relative">
         <img
           src={currentImage.src}
@@ -109,7 +116,10 @@ export const HeroFrame = () => {
           {heroImages.map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(index);
+              }}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === currentIndex
                   ? 'bg-white scale-125'

@@ -12,7 +12,7 @@ const Index = () => {
       <Navigation />
       
       {/* Fullscreen Hero Section - Edge to Edge */}
-      <section className="relative h-screen w-screen ml-[-8px] mr-[-8px] overflow-hidden">
+      <section className="relative h-screen w-screen absolute top-0 left-0 overflow-hidden">
         {/* Logo positioned in top left */}
         <div className="absolute top-8 left-8 z-20">
           <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
@@ -27,7 +27,7 @@ const Index = () => {
       </section>
 
       {/* Projects Grid Section */}
-      <section id="work" className="py-20">
+      <section id="work" className="py-20 mt-[100vh]">
         <div className="mb-16">
           <h2 className="heading-large mb-6">Projects</h2>
           <p className="text-lg text-muted-foreground max-w-3xl">
