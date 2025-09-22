@@ -82,8 +82,8 @@ export const HeroFrame = () => {
   const currentImage = heroImages[currentIndex];
 
   return (
-    <div className="hero-frame rounded-xl overflow-hidden relative group">
-      <div className="aspect-[4/3] relative">
+    <div className="w-full h-full relative group">
+      <div className="w-full h-full relative">
         <img
           src={currentImage.src}
           alt={currentImage.title}
@@ -93,24 +93,24 @@ export const HeroFrame = () => {
         />
         
         {/* Overlay with project info */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        <div className="absolute bottom-6 left-6 transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100">
-          <h3 className="text-white text-xl font-semibold mb-1">
+        <div className="absolute bottom-8 left-8 transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100">
+          <h3 className="text-white text-2xl font-semibold mb-2">
             {currentImage.title}
           </h3>
-          <p className="text-white/80 text-sm font-medium">
+          <p className="text-white/80 text-base font-medium">
             {currentImage.category}
           </p>
         </div>
 
         {/* Cycling indicators */}
-        <div className="absolute bottom-6 right-6 flex space-x-2">
+        <div className="absolute bottom-8 right-8 flex space-x-3">
           {heroImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === currentIndex
                   ? 'bg-white scale-125'
                   : 'bg-white/40 hover:bg-white/60'

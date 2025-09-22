@@ -11,22 +11,18 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="pt-20 pb-16">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Left side - Name and intro */}
-          <div className="space-y-8 animate-slide-up">
-            <div>
-              <h1 className="heading-display">
-                Nuh Ali
-              </h1>
-            </div>
-          </div>
+      {/* Fullscreen Hero Section */}
+      <section className="relative h-screen w-full overflow-hidden">
+        {/* Logo positioned in top left */}
+        <div className="absolute top-8 left-8 z-20">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
+            Nuh Ali
+          </h1>
+        </div>
 
-          {/* Right side - Hero cycling frame */}
-          <div className="animate-fade-in lg:scale-125" style={{ animationDelay: '200ms' }}>
-            <HeroFrame />
-          </div>
+        {/* Fullscreen Hero Frame */}
+        <div className="w-full h-full">
+          <HeroFrame />
         </div>
       </section>
 
