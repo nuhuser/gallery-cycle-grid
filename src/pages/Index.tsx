@@ -13,8 +13,8 @@ const Index = () => {
       
       {/* Fullscreen Hero Section */}
       <section className="relative h-screen w-full overflow-hidden">
-        {/* Logo positioned in top left */}
-        <div className="absolute top-8 left-8 z-20">
+        {/* Logo centered */}
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
           <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
             Nuh Ali
           </h1>

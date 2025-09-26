@@ -28,24 +28,6 @@ export const Navigation = () => {
             </a>
           </li>
         </ul>
-        
-        {/* Social links */}
-        <div className="flex space-x-3 mt-6 pt-4 border-t border-border/30">
-          <a 
-            href="#" 
-            className="text-muted-foreground hover:text-foreground transition-colors duration-300 text-xs"
-            aria-label="LinkedIn"
-          >
-            IN
-          </a>
-          <a 
-            href="#" 
-            className="text-muted-foreground hover:text-foreground transition-colors duration-300 text-xs"
-            aria-label="Instagram"
-          >
-            IG
-          </a>
-        </div>
       </div>
     </nav>
   );
