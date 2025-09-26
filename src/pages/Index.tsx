@@ -11,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Fullscreen Hero Section - True Edge to Edge */}
+      {/* Fullscreen Hero Section - Edge to Edge */}
       <section className="relative h-screen w-full overflow-hidden">
         {/* Logo positioned in top left */}
         <div className="absolute top-8 left-8 z-20">
@@ -21,7 +21,7 @@ const Index = () => {
         </div>
 
         {/* Fullscreen Hero Frame */}
-        <div className="w-full h-full">
+        <div className="absolute inset-0">
           <HeroFrame />
         </div>
       </section>
