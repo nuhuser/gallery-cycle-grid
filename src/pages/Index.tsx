@@ -12,7 +12,7 @@ const Index = () => {
       <Navigation />
       
       {/* Fullscreen Hero Section - Edge to Edge */}
-      <section className="relative h-screen w-full overflow-hidden">
+      <section className="relative h-screen w-screen ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] -mt-12 overflow-hidden">
         {/* Logo positioned in top left */}
         <div className="absolute top-8 left-8 z-20">
           <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
