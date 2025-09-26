@@ -27,14 +27,14 @@ const Index = () => {
       </section>
 
       {/* Main Content Container */}
-      <div className="max-w-7xl mx-auto px-8">
+      <div className="w-full">
         {/* Projects Grid Section */}
         <section id="work" className="relative bg-background py-20">
-          <div className="mb-16">
+          <div className="mb-16 px-8">
             <h2 className="heading-large mb-6 text-left">Projects</h2>
           </div>
         
-        <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
+        <div className="animate-slide-up px-8" style={{ animationDelay: '400ms' }}>
           <DatabasePhotoGrid />
         </div>
         </section>
