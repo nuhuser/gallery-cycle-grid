@@ -31,7 +31,7 @@ const Index = () => {
         {/* Projects Grid Section */}
         <section id="work" className="relative bg-background py-20">
           <div className="mb-16">
-            <h2 className="heading-large mb-6">Projects</h2>
+            <h2 className="heading-large mb-6 text-left">Projects</h2>
           </div>
         
         <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>

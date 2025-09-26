@@ -58,7 +58,7 @@ export const DatabasePhotoGrid = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
         {[...Array(6)].map((_, index) => (
           <div
             key={index}
@@ -70,7 +70,7 @@ export const DatabasePhotoGrid = () => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
       {projects.map((project, index) => (
         <Link
           key={project.id}
