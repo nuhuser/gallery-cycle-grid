@@ -123,9 +123,6 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-courier antialiased;
     font-size: 18px;
     line-height: 1.6;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 48px 8px;
   }
 
   /* Typography System - Courier Prime */

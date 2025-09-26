@@ -11,8 +11,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Fullscreen Hero Section - Edge to Edge */}
-      <section className="relative h-screen w-screen ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] -mt-12 overflow-hidden">
+      {/* Fullscreen Hero Section */}
+      <section className="relative h-screen w-full overflow-hidden">
         {/* Logo positioned in top left */}
         <div className="absolute top-8 left-8 z-20">
           <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
@@ -26,19 +26,22 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Projects Grid Section */}
-      <section id="work" className="relative bg-background py-20">
-        <div className="mb-16">
-          <h2 className="heading-large mb-6">Projects</h2>
-        </div>
+      {/* Main Content Container */}
+      <div className="max-w-7xl mx-auto px-8">
+        {/* Projects Grid Section */}
+        <section id="work" className="relative bg-background py-20">
+          <div className="mb-16">
+            <h2 className="heading-large mb-6">Projects</h2>
+          </div>
         
         <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
           <DatabasePhotoGrid />
         </div>
-      </section>
+        </section>
+      </div>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-border/50">
+      <footer className="max-w-7xl mx-auto px-8 py-12 border-t border-border/50">
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h3 className="font-bold mb-4 text-sm">Get in Touch</h3>
