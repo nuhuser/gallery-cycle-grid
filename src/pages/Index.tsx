@@ -8,28 +8,28 @@ import { Settings } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
       {/* Fullscreen Hero Section - True Edge to Edge */}
-      <div className="fixed top-0 left-0 w-full h-full z-0">
-        <HeroFrame />
-      </div>
+      <section className="relative h-screen w-full overflow-hidden">
+        {/* Logo positioned in top left */}
+        <div className="absolute top-8 left-8 z-20">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
+            Nuh Ali
+          </h1>
+        </div>
 
-      {/* Logo positioned in top left */}
-      <div className="absolute top-8 left-8 z-20">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
-          Nuh Ali
-        </h1>
-      </div>
+        {/* Fullscreen Hero Frame */}
+        <div className="w-full h-full">
+          <HeroFrame />
+        </div>
+      </section>
 
       {/* Projects Grid Section */}
-      <section id="work" className="relative z-10 bg-background py-20 mt-[100vh]">
+      <section id="work" className="relative bg-background py-20">
         <div className="mb-16">
           <h2 className="heading-large mb-6">Projects</h2>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            Exploring the intersection of form, function, and visual storytelling across multiple disciplines.
-          </p>
         </div>
         
         <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
