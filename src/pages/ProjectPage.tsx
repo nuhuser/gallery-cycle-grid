@@ -199,18 +199,6 @@ const ProjectPage = () => {
                   });
                 }
                 
-                // Add video files from project files
-                if (project.files) {
-                  project.files.forEach((file: any) => {
-                    if (file.type?.startsWith('video/') || file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)) {
-                      mediaItems.push({
-                        url: file.url,
-                        type: 'video' as const,
-                        name: file.name || 'Video File'
-                      });
-                    }
-                  });
-                }
                 
                 return mediaItems.length > 0 ? (
                   <MediaCarousel 
@@ -229,19 +217,11 @@ const ProjectPage = () => {
             {/* Sidebar */}
             <div className="lg:w-1/4 space-y-6">
               {/* Non-Media Files */}
-              {project.files && project.files.filter((file: any) => 
-                !file.type?.startsWith('video/') && 
-                !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
-              ).length > 0 && (
+              {project.files && project.files.length > 0 && (
                 <div>
                   <h3 className="font-semibold mb-3">Project Files</h3>
                   <div className="space-y-2">
-                    {project.files
-                      .filter((file: any) => 
-                        !file.type?.startsWith('video/') && 
-                        !file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
-                      )
-                      .map((file: any, index: number) => (
+                    {project.files.map((file: any, index: number) => (
                       <div key={index} className="border border-border rounded p-3">
                         <div className="flex items-center justify-between">
                           <div>

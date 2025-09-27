@@ -26,7 +26,6 @@ import {
   Plus, 
   FileText, 
   Image, 
-  Play, 
   Minus,
   Eye,
   Save,
@@ -118,7 +117,7 @@ const ProjectLayoutEditor = () => {
 
   const generateBlockId = () => `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  const addBlock = (type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid') => {
+  const addBlock = (type: 'text' | 'image' | 'spacer' | 'photo-grid') => {
     const newBlock: ContentBlockData = {
       id: generateBlockId(),
       type,
@@ -251,14 +250,6 @@ const ProjectLayoutEditor = () => {
                   >
                     <Image className="w-4 h-4 mr-2" />
                     Image Block
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => addBlock('video')}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Video Block
                   </Button>
                   <Button
                     variant="outline"

@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, X, Edit, Image, FileText, Play, Grid, RotateCcw } from 'lucide-react';
+import { GripVertical, X, Edit, Image, FileText, Grid, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { InlineTextEditor } from './InlineTextEditor';
 import { Lightbox } from '@/components/ui/lightbox';
-import { isEmbedUrl, convertToEmbedUrl } from '@/utils/videoUtils';
 
 export interface ContentBlockData {
   id: string;
-  type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid';
+  type: 'text' | 'image' | 'spacer' | 'photo-grid';
   content?: string;
   url?: string;
   alt?: string;
@@ -143,58 +142,6 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                 <div className="text-center">
                   <Image className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to add image</p>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      
-      case 'video':
-        return (
-          <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
-            {block.url ? (
-              <div className="space-y-2">
-                {isEmbedUrl(block.url) ? (
-                  <div className="w-full overflow-hidden rounded-lg">
-                    <div className="aspect-video w-full">
-                      <iframe
-                        src={convertToEmbedUrl(block.url)}
-                        title={block.caption || block.alt || 'Embedded video'}
-                        className="w-full h-full rounded-lg"
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <video
-                    src={block.url}
-                    controls
-                    className="w-full h-auto rounded-lg"
-                    muted
-                    playsInline
-                    onLoadedData={(e) => {
-                      const video = e.currentTarget;
-                      // Auto-loop short videos
-                      if (video.duration && video.duration < 60) {
-                        video.loop = true;
-                        video.autoplay = true;
-                      }
-                    }}
-                  />
-                )}
-                {block.caption && (
-                  <p className="text-sm text-muted-foreground text-center italic">
-                    {block.caption}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to add video</p>
                 </div>
               </div>
             )}

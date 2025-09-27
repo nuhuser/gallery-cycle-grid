@@ -9,7 +9,6 @@ import { ContentBlockData } from './ContentBlock';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
-import { extractVideoUrl } from '@/utils/videoUtils';
 
 interface BlockEditorProps {
   block: ContentBlockData;
@@ -33,7 +32,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setEditedBlock(block);
   }, [block]);
 
-  const handleFileUpload = async (file: File, type: 'image' | 'video') => {
+  const handleFileUpload = async (file: File) => {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
@@ -55,7 +54,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         url: data.publicUrl
       }));
 
-      toast.success(`${type === 'image' ? 'Image' : 'Video'} uploaded successfully`);
+      toast.success('Image uploaded successfully');
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload file');
@@ -69,11 +68,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
   };
 
   const getAvailableMedia = () => {
-    const images = projectImages.map(url => ({ url, type: 'image' }));
-    const videos = projectFiles
-      .filter(file => file.type?.startsWith('video/') || file.name?.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i))
-      .map(file => ({ url: file.url, type: 'video', name: file.name }));
-    return [...images, ...videos];
+    return projectImages.map(url => ({ url, type: 'image' as const }));
   };
 
   return (
@@ -87,7 +82,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       </div>
 
       {/* Size and Alignment Controls */}
-      {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid') && (
+      {(block.type === 'text' || block.type === 'image' || block.type === 'photo-grid') && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Size</Label>
@@ -137,11 +132,11 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       )}
 
-      {(block.type === 'image' || block.type === 'video') && (
+      {block.type === 'image' && (
         <div className="space-y-4">
           {/* Media Selection */}
           <div>
-            <Label>Select from Project Media</Label>
+            <Label>Select from Project Images</Label>
             <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto">
               {getAvailableMedia().map((media, index) => (
                 <button
@@ -151,11 +146,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
                     editedBlock.url === media.url ? 'border-primary' : 'border-border hover:border-border/60'
                   }`}
                 >
-                  {media.type === 'image' ? (
-                    <img src={media.url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <video src={media.url} className="w-full h-full object-cover" />
-                  )}
+                  <img src={media.url} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -163,14 +154,14 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
           {/* File Upload */}
           <div>
-            <Label>Or Upload New {block.type}</Label>
+            <Label>Or Upload New Image</Label>
             <Input
               type="file"
-              accept={block.type === 'image' ? 'image/*' : 'video/*'}
+              accept="image/*"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  handleFileUpload(file, block.type as 'image' | 'video');
+                  handleFileUpload(file);
                 }
               }}
               disabled={uploading}
@@ -179,29 +170,12 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
           {/* URL Input */}
           <div>
-            <Label>Or Enter URL{block.type === 'video' ? ' (supports Google Drive, Google Photos, YouTube, Vimeo)' : ''}</Label>
+            <Label>Or Enter URL</Label>
             <Input
               value={editedBlock.url || ''}
-              onChange={(e) => {
-                const inputValue = e.target.value;
-                if (block.type === 'video') {
-                  const processedUrl = extractVideoUrl(inputValue);
-                  setEditedBlock(prev => ({ ...prev, url: processedUrl || inputValue }));
-                } else {
-                  setEditedBlock(prev => ({ ...prev, url: inputValue }));
-                }
-              }}
-              placeholder={
-                block.type === 'video' 
-                  ? 'Paste Google Drive/Photos link, YouTube, Vimeo, or direct video URL...'
-                  : `Enter ${block.type} URL...`
-              }
+              onChange={(e) => setEditedBlock(prev => ({ ...prev, url: e.target.value }))}
+              placeholder="Enter image URL..."
             />
-            {block.type === 'video' && editedBlock.url?.includes('photos.google.com') && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Note: Google Photos links may require public sharing to work properly.
-              </p>
-            )}
           </div>
 
           {/* Caption */}
@@ -215,17 +189,15 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
             />
           </div>
 
-          {/* Alt text for images */}
-          {block.type === 'image' && (
-            <div>
-              <Label>Alt Text</Label>
-              <Input
-                value={editedBlock.alt || ''}
-                onChange={(e) => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
-                placeholder="Describe the image for accessibility..."
-              />
-            </div>
-          )}
+          {/* Alt text */}
+          <div>
+            <Label>Alt Text</Label>
+            <Input
+              value={editedBlock.alt || ''}
+              onChange={(e) => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
+              placeholder="Describe the image for accessibility..."
+            />
+          </div>
         </div>
       )}
 

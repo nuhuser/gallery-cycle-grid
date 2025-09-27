@@ -55,14 +55,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           return;
         }
       } else {
-        // Validate other file types - now including video
+        // Validate other file types
         const allowedTypes = [
           'application/pdf', 'text/plain', 'application/msword',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime'
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
         
-        const allowedExtensions = ['.stl', '.obj', '.3ds', '.fbx', '.dae', '.mp4', '.webm', '.mov', '.avi'];
+        const allowedExtensions = ['.stl', '.obj', '.3ds', '.fbx', '.dae'];
         const hasAllowedExtension = allowedExtensions.some(ext => 
           file.name.toLowerCase().endsWith(ext)
         );
