@@ -9,6 +9,7 @@ import { ContentBlockData } from './ContentBlock';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
+import { extractVideoUrl } from '@/utils/videoUtils';
 
 interface BlockEditorProps {
   block: ContentBlockData;
@@ -178,12 +179,29 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
           {/* URL Input */}
           <div>
-            <Label>Or Enter URL</Label>
+            <Label>Or Enter URL{block.type === 'video' ? ' (supports Google Drive, Google Photos, YouTube, Vimeo)' : ''}</Label>
             <Input
               value={editedBlock.url || ''}
-              onChange={(e) => setEditedBlock(prev => ({ ...prev, url: e.target.value }))}
-              placeholder={`Enter ${block.type} URL...`}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (block.type === 'video') {
+                  const processedUrl = extractVideoUrl(inputValue);
+                  setEditedBlock(prev => ({ ...prev, url: processedUrl || inputValue }));
+                } else {
+                  setEditedBlock(prev => ({ ...prev, url: inputValue }));
+                }
+              }}
+              placeholder={
+                block.type === 'video' 
+                  ? 'Paste Google Drive/Photos link, YouTube, Vimeo, or direct video URL...'
+                  : `Enter ${block.type} URL...`
+              }
             />
+            {block.type === 'video' && editedBlock.url?.includes('photos.google.com') && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Note: Google Photos links may require public sharing to work properly.
+              </p>
+            )}
           </div>
 
           {/* Caption */}

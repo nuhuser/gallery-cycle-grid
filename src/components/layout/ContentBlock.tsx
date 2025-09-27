@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { InlineTextEditor } from './InlineTextEditor';
 import { Lightbox } from '@/components/ui/lightbox';
+import { isEmbedUrl, convertToEmbedUrl } from '@/utils/videoUtils';
 
 export interface ContentBlockData {
   id: string;
@@ -70,31 +71,6 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
     return alignmentMap[alignment as keyof typeof alignmentMap] || alignmentMap.center;
   };
 
-  const isEmbedUrl = (url?: string) => {
-    if (!url) return false;
-    return /youtu\.be|youtube\.com|vimeo\.com/.test(url);
-  };
-
-  const toEmbedUrl = (url: string) => {
-    try {
-      const u = new URL(url);
-      // YouTube
-      if (u.hostname.includes('youtube.com')) {
-        const v = u.searchParams.get('v');
-        return v ? `https://www.youtube.com/embed/${v}` : url;
-      }
-      if (u.hostname.includes('youtu.be')) {
-        const id = u.pathname.slice(1);
-        return `https://www.youtube.com/embed/${id}`;
-      }
-      // Vimeo
-      if (u.hostname.includes('vimeo.com')) {
-        const id = u.pathname.split('/').filter(Boolean)[0];
-        return id ? `https://player.vimeo.com/video/${id}` : url;
-      }
-    } catch {}
-    return url;
-  };
 
   const handleTextSave = (newContent: string) => {
     if (onUpdateBlock) {
@@ -182,7 +158,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                   <div className="w-full overflow-hidden rounded-lg">
                     <div className="aspect-video w-full">
                       <iframe
-                        src={toEmbedUrl(block.url)}
+                        src={convertToEmbedUrl(block.url)}
                         title={block.caption || block.alt || 'Embedded video'}
                         className="w-full h-full rounded-lg"
                         loading="lazy"
@@ -196,6 +172,16 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                     src={block.url}
                     controls
                     className="w-full h-auto rounded-lg"
+                    muted
+                    playsInline
+                    onLoadedData={(e) => {
+                      const video = e.currentTarget;
+                      // Auto-loop short videos
+                      if (video.duration && video.duration < 60) {
+                        video.loop = true;
+                        video.autoplay = true;
+                      }
+                    }}
                   />
                 )}
                 {block.caption && (

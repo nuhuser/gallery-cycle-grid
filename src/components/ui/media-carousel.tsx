@@ -2,11 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getVideoDuration, shouldAutoLoop, getVideoAspectRatio, isEmbedUrl, convertToEmbedUrl } from '@/utils/videoUtils';
 
 interface MediaItem {
   url: string;
   type: 'image' | 'video';
   name?: string;
+  duration?: number;
+  aspectRatio?: number;
 }
 
 interface MediaCarouselProps {
@@ -25,6 +28,8 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showLargeViewer, setShowLargeViewer] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
+  const [videoAspectRatio, setVideoAspectRatio] = useState<number>(16/9);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const currentItem = items[currentIndex];
@@ -52,35 +57,57 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
   };
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && isVideo) {
       const video = videoRef.current;
       
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
-      const handleEnded = () => setIsPlaying(false);
+      const handleEnded = () => {
+        setIsPlaying(false);
+        // Auto-replay for short videos
+        if (shouldAutoLoop(videoDuration)) {
+          video.currentTime = 0;
+          video.play();
+        }
+      };
+
+      const handleLoadedData = async () => {
+        try {
+          const duration = await getVideoDuration(video);
+          const aspectRatio = getVideoAspectRatio(video);
+          
+          setVideoDuration(duration);
+          setVideoAspectRatio(aspectRatio);
+          
+          // Set loop attribute for short videos
+          video.loop = shouldAutoLoop(duration);
+          
+          // Auto-play video when it becomes current
+          video.muted = true;
+          void video.play();
+        } catch (e) {
+          console.warn('Video auto-play blocked:', e);
+        }
+      };
 
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
       video.addEventListener('ended', handleEnded);
+      video.addEventListener('loadeddata', handleLoadedData);
 
-      // Auto-play video when it becomes current
-      if (isVideo) {
-        try {
-          video.muted = true;
-          video.load();
-          void video.play();
-        } catch (e) {
-          // Autoplay may be blocked
-        }
+      // Trigger load if video is already loaded
+      if (video.readyState >= 2) {
+        handleLoadedData();
       }
 
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
         video.removeEventListener('ended', handleEnded);
+        video.removeEventListener('loadeddata', handleLoadedData);
       };
     }
-  }, [currentIndex, isVideo]);
+  }, [currentIndex, isVideo, videoDuration]);
 
   if (!items.length) return null;
 
@@ -88,47 +115,70 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
     <div className={cn("relative group", className)}>
       {/* Large Viewer */}
       <div 
-        className="relative bg-muted mb-4 cursor-pointer flex items-center justify-center h-[60vh]"
+        className="relative bg-muted mb-4 cursor-pointer flex items-center justify-center"
+        style={{ 
+          aspectRatio: isVideo ? videoAspectRatio : aspectRatio,
+          minHeight: '300px',
+          maxHeight: '70vh'
+        }}
         onClick={() => setShowLargeViewer(true)}
       >
         {isVideo ? (
           <div key={currentIndex} className="relative w-full h-full animate-fade-in flex items-center justify-center">
-            <video
-              key={currentIndex}
-              ref={videoRef}
-              src={currentItem.url}
-              className="max-w-full max-h-full object-contain"
-              loop
-              muted
-              playsInline
-              autoPlay
-              controls
-              onLoadedData={() => {
-                if (videoRef.current) {
-                  try {
-                    videoRef.current.currentTime = 0;
-                    videoRef.current.play();
-                  } catch {}
-                }
-              }}
-              onClick={togglePlayPause}
-            />
+            {isEmbedUrl(currentItem.url) ? (
+              <iframe
+                key={currentIndex}
+                src={convertToEmbedUrl(currentItem.url)}
+                className="w-full h-full rounded-lg"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ aspectRatio: videoAspectRatio }}
+              />
+            ) : (
+              <video
+                key={currentIndex}
+                ref={videoRef}
+                src={currentItem.url}
+                className="max-w-full max-h-full object-contain"
+                muted
+                playsInline
+                controls
+                style={{ aspectRatio: videoAspectRatio }}
+                onError={(e) => {
+                  console.error('Video load error:', e);
+                  // Fallback handling could be added here
+                }}
+              />
+            )}
             
-            {/* Video Controls Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="secondary"
-                size="icon"
-                className="bg-background/80 hover:bg-background/90"
-                onClick={togglePlayPause}
-              >
-                {isPlaying ? (
-                  <Pause className="h-6 w-6" />
-                ) : (
-                  <Play className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
+            {/* Video Controls Overlay - only show for direct video files */}
+            {!isEmbedUrl(currentItem.url) && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background/90 pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlayPause();
+                  }}
+                >
+                  {isPlaying ? (
+                    <Pause className="h-6 w-6" />
+                  ) : (
+                    <Play className="h-6 w-6" />
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            {/* Duration indicator for short videos */}
+            {videoDuration > 0 && shouldAutoLoop(videoDuration) && (
+              <div className="absolute bottom-2 left-2 bg-background/80 text-foreground px-2 py-1 rounded text-xs">
+                GIF-like ({Math.round(videoDuration)}s)
+              </div>
+            )}
           </div>
         ) : (
           <img
@@ -207,17 +257,27 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
             )}
             
             {isVideo ? (
-              <video
-                src={currentItem.url}
-                className="h-[60vh] w-auto object-contain"
-                controls
-                autoPlay
-              />
+              isEmbedUrl(currentItem.url) ? (
+                <iframe
+                  src={convertToEmbedUrl(currentItem.url)}
+                  className="w-[90vw] h-[60vh] object-contain rounded-lg"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={currentItem.url}
+                  className="max-w-[90vw] max-h-[60vh] object-contain"
+                  controls
+                  autoPlay
+                  style={{ aspectRatio: videoAspectRatio }}
+                />
+              )
             ) : (
               <img
                 src={currentItem.url}
                 alt={currentItem.name || `Media ${currentIndex + 1}`}
-                className="h-[60vh] w-auto object-contain"
+                className="max-w-[90vw] max-h-[60vh] object-contain"
               />
             )}
             
