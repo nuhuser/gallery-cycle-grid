@@ -48,12 +48,32 @@ const Index = () => {
             <p className="text-muted-foreground mb-4 text-sm">
               Available for collaborations and new projects.
             </p>
-            <a 
-              href="mailto:hello@example.com" 
+            <ul> 
+            <li>
+             <a 
+              href="anewtakegear@gmail.com" 
               className="text-foreground hover:text-hero-accent transition-colors duration-300 font-bold text-sm"
             >
-              hello@example.com
+              anewtakegear@gmail.com
             </a>
+             </li>
+               <li>
+             <a 
+              href="https://www.instagram.com/nana0.687/" 
+              className="text-foreground hover:text-hero-accent transition-colors duration-300 font-bold text-sm"
+            >
+              @nana.0687
+            </a>
+             </li>
+                  <li>
+             <a 
+              href="www.linkedin.com/in/nuh-ali" 
+              className="text-foreground hover:text-hero-accent transition-colors duration-300 font-bold text-sm"
+            >
+              LinkedIn
+            </a>
+             </li>
+              </ul>
           </div>
           
           <div className="text-right">
