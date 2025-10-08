@@ -26,16 +26,6 @@ export const logAdminAction = async (
       return;
     }
 
-    const logEntry: AuditLogEntry = {
-      action,
-      resource_type: resourceType,
-      resource_id: resourceId,
-      user_id: user.id,
-      details,
-      ip_address: await getClientIP(),
-      user_agent: navigator.userAgent,
-    };
-
     // Log to console for immediate monitoring
     console.log('Admin Action:', {
       user: user.email,
@@ -45,25 +35,29 @@ export const logAdminAction = async (
       details,
     });
 
-    // Store audit log in database for proper tracking
-    const { error: insertError } = await supabase
-      .from('audit_logs')
-      .insert([{
-        action: logEntry.action,
-        resource_type: logEntry.resource_type,
-        resource_id: logEntry.resource_id,
-        user_id: logEntry.user_id,
-        details: logEntry.details,
-        ip_address: logEntry.ip_address,
-        user_agent: logEntry.user_agent,
-      }]);
+    // Use the secure server-side function to insert audit logs
+    // This prevents users from inserting fake logs or manipulating user_id
+    const { data, error: rpcError } = await supabase.rpc('insert_audit_log', {
+      p_action: action,
+      p_resource_type: resourceType,
+      p_resource_id: resourceId,
+      p_details: details,
+      p_ip_address: await getClientIP(),
+      p_user_agent: navigator.userAgent,
+    });
 
-    if (insertError) {
-      console.error('Failed to insert audit log:', insertError);
+    if (rpcError) {
+      console.error('Failed to insert audit log:', rpcError);
       // Fallback to localStorage if database insert fails
       const auditLogs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
       auditLogs.push({
-        ...logEntry,
+        action,
+        resource_type: resourceType,
+        resource_id: resourceId,
+        user_id: user.id,
+        details,
+        ip_address: await getClientIP(),
+        user_agent: navigator.userAgent,
         timestamp: new Date().toISOString(),
       });
       
