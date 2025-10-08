@@ -17,14 +17,13 @@ interface BlockEditorProps {
   onCancel: () => void;
 }
 
+// VideoBlock now renders raw iframe code with responsive scaling and YouTube autoplay/loop/mute
 const VideoBlock: React.FC<{ iframeCode: string }> = ({ iframeCode }) => {
   if (!iframeCode || iframeCode.trim() === '') {
-    return <p className="text-center text-sm text-muted-foreground">
-      Paste your iframe code above.
-    </p>;
+    return <p className="text-center text-sm text-muted-foreground">Paste your iframe code above.</p>;
   }
 
-  // Extract width and height from the iframe
+  // Extract original width and height
   const widthMatch = iframeCode.match(/width="(\d+)"/);
   const heightMatch = iframeCode.match(/height="(\d+)"/);
 
@@ -33,7 +32,7 @@ const VideoBlock: React.FC<{ iframeCode: string }> = ({ iframeCode }) => {
 
   const aspectRatio = width / height;
 
-  // Auto-modify YouTube iframe to loop/mute/autoplay
+  // Auto-modify YouTube iframe for loop/mute/autoplay
   const modifiedIframeCode = iframeCode.replace(
     /<iframe\s+([^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)[^"]*")([^>]*)>/,
     (_match, pre, videoId, post) =>
@@ -43,32 +42,21 @@ const VideoBlock: React.FC<{ iframeCode: string }> = ({ iframeCode }) => {
   return (
     <div
       className="relative w-full mx-auto overflow-hidden rounded-xl shadow-md"
-      style={{
-        paddingTop: `${100 / aspectRatio}%`, // maintains aspect ratio
-        position: 'relative',
-      }}
+      style={{ paddingTop: `${100 / aspectRatio}%`, position: 'relative' }}
     >
       <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-        }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
         dangerouslySetInnerHTML={{ __html: modifiedIframeCode }}
       />
     </div>
   );
 };
 
-
-
 export const BlockEditor: React.FC<BlockEditorProps> = ({
   block,
   projectImages = [],
   onSave,
-  onCancel
+  onCancel,
 }) => {
   const [editedBlock, setEditedBlock] = useState<ContentBlockData>(block);
   const [uploading, setUploading] = useState(false);
@@ -80,35 +68,30 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
   const handleFileUpload = async (file: File, fileType: 'image' | 'poster' = 'image') => {
     setUploading(true);
     try {
-      // Upload image to Supabase
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
       const { data, error } = await supabase.storage
         .from('project-media')
-        .upload(fileName, file);
+        .upload(`${Date.now()}-${file.name}`, file);
 
       if (error) throw error;
 
-      const publicUrl = supabase.storage.from('project-media').getPublicUrl(data.path).publicUrl;
+      const url = supabase.storage.from('project-media').getPublicUrl(data.path).publicUrl;
 
       if (fileType === 'poster') {
-        setEditedBlock(prev => ({ ...prev, poster: publicUrl }));
+        setEditedBlock(prev => ({ ...prev, poster: url }));
       } else {
-        setEditedBlock(prev => ({ ...prev, url: publicUrl }));
+        setEditedBlock(prev => ({ ...prev, url }));
       }
 
-      toast.success(`${fileType === 'poster' ? 'Poster' : 'Image'} uploaded successfully!`);
+      toast.success(`${fileType === 'poster' ? 'Poster' : 'Image'} uploaded successfully`);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload image.');
+      console.error(error);
+      toast.error('Failed to upload file.');
     } finally {
       setUploading(false);
     }
   };
 
   const handleSave = () => onSave(editedBlock);
-
-  const getAvailableMedia = () => projectImages.map(url => ({ url, type: 'image' as const }));
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-background">
@@ -120,18 +103,16 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       </div>
 
-      {/* Size and Alignment Controls */}
+      {/* Size & Alignment */}
       {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid') && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Size</Label>
             <Select
               value={editedBlock.size || 'medium'}
-              onValueChange={(value) => setEditedBlock(prev => ({ ...prev, size: value as any }))}
+              onValueChange={value => setEditedBlock(prev => ({ ...prev, size: value as any }))}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="small">Small</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
@@ -144,11 +125,9 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
             <Label>Alignment</Label>
             <Select
               value={editedBlock.alignment || 'center'}
-              onValueChange={(value) => setEditedBlock(prev => ({ ...prev, alignment: value as any }))}
+              onValueChange={value => setEditedBlock(prev => ({ ...prev, alignment: value as any }))}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="left">Left</SelectItem>
                 <SelectItem value="center">Center</SelectItem>
@@ -159,224 +138,151 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       )}
 
-      {/* Type-specific editors */}
+      {/* Text Block */}
       {block.type === 'text' && (
         <div>
           <Label>Content</Label>
           <RichTextEditor
             value={editedBlock.content || ''}
-            onChange={(content) => setEditedBlock(prev => ({ ...prev, content }))}
+            onChange={content => setEditedBlock(prev => ({ ...prev, content }))}
             placeholder="Enter your text content..."
           />
         </div>
       )}
 
+      {/* Image Block */}
       {block.type === 'image' && (
         <div className="space-y-4">
-          <div>
-            <Label>Select from Project Images</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto">
-              {getAvailableMedia().map((media, index) => (
-                <button
-                  key={index}
-                  onClick={() => setEditedBlock(prev => ({ ...prev, url: media.url }))}
-                  className={`aspect-square rounded overflow-hidden border-2 ${
-                    editedBlock.url === media.url ? 'border-primary' : 'border-border hover:border-border/60'
-                  }`}
-                >
-                  <img src={media.url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+          <Label>Select from Project Images</Label>
+          <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto">
+            {projectImages.map((url, idx) => (
+              <button
+                key={idx}
+                onClick={() => setEditedBlock(prev => ({ ...prev, url }))}
+                className={`aspect-square rounded overflow-hidden border-2 ${
+                  editedBlock.url === url ? 'border-primary' : 'border-border hover:border-border/60'
+                }`}
+              >
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
           </div>
 
-          <div>
-            <Label>Or Upload New Image</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-              disabled={uploading}
-            />
-          </div>
+          <Label>Or Upload New Image</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+            disabled={uploading}
+          />
 
-          <div>
-            <Label>Or Enter URL</Label>
-            <Input
-              value={editedBlock.url || ''}
-              onChange={(e) => setEditedBlock(prev => ({ ...prev, url: e.target.value }))}
-              placeholder="Enter image URL..."
-            />
-          </div>
+          <Label>Caption (optional)</Label>
+          <Textarea
+            value={editedBlock.caption || ''}
+            onChange={e => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
+            rows={2}
+          />
 
-          <div>
-            <Label>Caption (optional)</Label>
-            <Textarea
-              value={editedBlock.caption || ''}
-              onChange={(e) => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
-              placeholder="Add a caption..."
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label>Alt Text</Label>
-            <Input
-              value={editedBlock.alt || ''}
-              onChange={(e) => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
-              placeholder="Describe the image for accessibility..."
-            />
-          </div>
+          <Label>Alt Text</Label>
+          <Input
+            value={editedBlock.alt || ''}
+            onChange={e => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
+            placeholder="Describe the image for accessibility..."
+          />
         </div>
       )}
 
-    {block.type === 'video' && (
-  <div className="space-y-4">
-    {/* Iframe HTML Input */}
-    <div>
-      <Label>Embed Video (Paste iframe code)</Label>
-      <Textarea
-        value={editedBlock.iframeCode || ''}
-        onChange={(e) => setEditedBlock(prev => ({ ...prev, iframeCode: e.target.value }))}
-        placeholder='Paste iframe embed code here, e.g. <iframe src="..."></iframe>'
-        rows={6}
-        className="w-full font-mono"
-      />
+      {/* Video Block (iframe embed) */}
+      {block.type === 'video' && (
+        <div className="space-y-4">
+          <Label>Embed Video (Paste iframe code)</Label>
+          <Textarea
+            value={editedBlock.iframeCode || ''}
+            onChange={e => setEditedBlock(prev => ({ ...prev, iframeCode: e.target.value }))}
+            placeholder='Paste iframe embed code here, e.g. <iframe src="..."></iframe>'
+            rows={6}
+            className="w-full font-mono"
+          />
 
-      {/* Live preview */}
-      <VideoBlock iframeCode={editedBlock.iframeCode || ''} />
-    </div>
+          <VideoBlock iframeCode={editedBlock.iframeCode || ''} />
 
-    {/* Poster Image */}
-    <div>
-      <Label>Poster Image (Optional)</Label>
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'poster')}
-        disabled={uploading}
-      />
-      {editedBlock.poster && (
-        <img src={editedBlock.poster} alt="Poster" className="mt-2 w-full max-h-32 object-cover rounded" />
+          <Label>Poster Image (Optional)</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'poster')}
+            disabled={uploading}
+          />
+          {editedBlock.poster && (
+            <img src={editedBlock.poster} alt="Poster" className="mt-2 w-full max-h-32 object-cover rounded" />
+          )}
+
+          <Label>Caption (optional)</Label>
+          <Textarea
+            value={editedBlock.caption || ''}
+            onChange={e => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
+            rows={2}
+          />
+        </div>
       )}
-    </div>
 
-    {/* Caption */}
-    <div>
-      <Label>Caption (optional)</Label>
-      <Textarea
-        value={editedBlock.caption || ''}
-        onChange={(e) => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
-        placeholder="Add a caption..."
-        rows={2}
-      />
-    </div>
-  </div>
-)}
-
-
+      {/* Photo Grid */}
       {block.type === 'photo-grid' && (
         <div className="space-y-4">
-          <div>
-            <Label>Grid Columns</Label>
-            <Select
-              value={editedBlock.gridColumns?.toString() || '3'}
-              onValueChange={(value) => setEditedBlock(prev => ({ ...prev, gridColumns: parseInt(value) }))}
-            >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2">2 Columns</SelectItem>
-                <SelectItem value="3">3 Columns</SelectItem>
-                <SelectItem value="4">4 Columns</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Label>Grid Columns</Label>
+          <Select
+            value={editedBlock.gridColumns?.toString() || '3'}
+            onValueChange={value => setEditedBlock(prev => ({ ...prev, gridColumns: parseInt(value) }))}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">2 Columns</SelectItem>
+              <SelectItem value="3">3 Columns</SelectItem>
+              <SelectItem value="4">4 Columns</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div>
-            <Label>Select Images from Project</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto">
-              {projectImages.map((imageUrl, index) => {
-                const isSelected = editedBlock.images?.some(img => img.url === imageUrl);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      const currentImages = editedBlock.images || [];
-                      if (isSelected) {
-                        setEditedBlock(prev => ({
-                          ...prev,
-                          images: currentImages.filter(img => img.url !== imageUrl)
-                        }));
-                      } else {
-                        setEditedBlock(prev => ({
-                          ...prev,
-                          images: [...currentImages, { url: imageUrl, alt: '', caption: '' }]
-                        }));
-                      }
-                    }}
-                    className={`aspect-square rounded overflow-hidden border-2 ${
-                      isSelected ? 'border-primary' : 'border-border hover:border-border/60'
-                    }`}
-                  >
-                    <img src={imageUrl} alt="" className="w-full h-full object-cover" />
-                  </button>
-                );
-              })}
-            </div>
+          <Label>Select Images from Project</Label>
+          <div className="grid grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto">
+            {projectImages.map((imageUrl, index) => {
+              const isSelected = editedBlock.images?.some(img => img.url === imageUrl);
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    const currentImages = editedBlock.images || [];
+                    if (isSelected) {
+                      setEditedBlock(prev => ({
+                        ...prev,
+                        images: currentImages.filter(img => img.url !== imageUrl),
+                      }));
+                    } else {
+                      setEditedBlock(prev => ({
+                        ...prev,
+                        images: [...currentImages, { url: imageUrl, alt: '', caption: '' }],
+                      }));
+                    }
+                  }}
+                  className={`aspect-square rounded overflow-hidden border-2 ${
+                    isSelected ? 'border-primary' : 'border-border hover:border-border/60'
+                  }`}
+                >
+                  <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                </button>
+              );
+            })}
           </div>
-
-          {editedBlock.images && editedBlock.images.length > 0 && (
-            <div>
-              <Label>Edit Image Details</Label>
-              <div className="space-y-3 mt-2 max-h-64 overflow-y-auto">
-                {editedBlock.images.map((img, index) => (
-                  <div key={index} className="border rounded p-3 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <img src={img.url} alt="" className="w-12 h-12 object-cover rounded" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditedBlock(prev => ({
-                          ...prev,
-                          images: prev.images?.filter((_, i) => i !== index)
-                        }))}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <Input
-                      placeholder="Alt text"
-                      value={img.alt || ''}
-                      onChange={(e) => {
-                        const newImages = [...(editedBlock.images || [])];
-                        newImages[index] = { ...newImages[index], alt: e.target.value };
-                        setEditedBlock(prev => ({ ...prev, images: newImages }));
-                      }}
-                    />
-                    <Input
-                      placeholder="Caption"
-                      value={img.caption || ''}
-                      onChange={(e) => {
-                        const newImages = [...(editedBlock.images || [])];
-                        newImages[index] = { ...newImages[index], caption: e.target.value };
-                        setEditedBlock(prev => ({ ...prev, images: newImages }));
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
+      {/* Spacer */}
       {block.type === 'spacer' && (
         <div>
           <Label>Height (pixels)</Label>
           <Input
             type="number"
             value={editedBlock.content || '40'}
-            onChange={(e) => setEditedBlock(prev => ({ ...prev, content: e.target.value }))}
+            onChange={e => setEditedBlock(prev => ({ ...prev, content: e.target.value }))}
             min="10"
             max="200"
           />
