@@ -227,20 +227,23 @@ const handleFileUpload = async (
       <p className="text-xs text-muted-foreground mt-1">
         You can paste either a Google Drive share link or a direct .mp4/.mov URL.
       </p>
-      {editedBlock.url && (
-        <div className="mt-2">
-          <video
-            src={editedBlock.url}
-            poster={editedBlock.poster}
-            controls
-            loop
-            muted
-            playsInline
-            className="w-full max-h-64 rounded"
-            onError={() => toast.error('Video failed to load — check the link')}
-          />
-        </div>
-      )}
+     {block.url?.includes('drive.google.com') ? (
+  <iframe
+    src={block.url}
+    width="100%"
+    height="480"
+    allow="autoplay"
+    allowFullScreen
+    className="rounded-xl shadow-md"
+  ></iframe>
+) : (
+  <video
+    controls
+    src={block.url}
+    poster={block.poster}
+    className="w-full rounded-xl shadow-md"
+  />
+)}
     </div>
 
     {/* Poster Upload (still uses Supabase) */}
