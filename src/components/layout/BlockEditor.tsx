@@ -33,44 +33,39 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setEditedBlock(block);
   }, [block]);
 
-  const handleFileUpload = async (file: File, fileType: 'image' | 'video' | 'poster' = 'image') => {
-    setUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const folder = fileType === 'video' ? 'videos' : 'layouts';
-      const filePath = `${folder}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('project-files')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('project-files')
-        .getPublicUrl(filePath);
-
+const handleFileUpload = async (
+  fileOrUrl: File | string,
+  fileType: 'image' | 'video' | 'poster' = 'image'
+) => {
+  setUploading(true);
+  try {
+    // ✅ Case 1: External link (e.g., Google Drive)
+    if (typeof fileOrUrl === 'string') {
       if (fileType === 'poster') {
         setEditedBlock(prev => ({
           ...prev,
-          poster: data.publicUrl
+          poster: fileOrUrl
         }));
       } else {
         setEditedBlock(prev => ({
           ...prev,
-          url: data.publicUrl
+          url: fileOrUrl
         }));
       }
 
-      toast.success(`${fileType === 'video' ? 'Video' : 'Image'} uploaded successfully`);
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload file');
-    } finally {
-      setUploading(false);
+      toast.success(`${fileType === 'video' ? 'Video link' : 'Image link'} added successfully`);
+      return;
     }
-  };
+
+    // 🚫 Case 2: Local file upload (currently disabled)
+    toast.error('Direct uploads are disabled. Please paste a Google Drive link instead.');
+  } catch (error) {
+    console.error('Upload error:', error);
+    toast.error('Failed to handle video link.');
+  } finally {
+    setUploading(false);
+  }
+};
 
   const handleSave = () => {
     onSave(editedBlock);
