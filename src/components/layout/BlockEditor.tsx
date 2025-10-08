@@ -20,10 +20,19 @@ interface BlockEditorProps {
 }
 const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
   const getYouTubeID = (url: string) => {
-    // Match standard YouTube links, short links, and shorts links
-    const match =
-      url.match(/(?:youtube\.com\/.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
-    return match ? match[1] : '';
+    try {
+      const u = new URL(url);
+      // Standard watch URL
+      if (u.hostname.includes('youtube.com')) {
+        if (u.pathname === '/watch') return u.searchParams.get('v') || '';
+        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
+      }
+      // Shortened youtu.be URL
+      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+    } catch {
+      return '';
+    }
+    return '';
   };
 
   const youTubeID = getYouTubeID(url);
@@ -48,6 +57,7 @@ const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
     </div>
   );
 };
+
 
 
 
