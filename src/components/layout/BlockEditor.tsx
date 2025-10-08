@@ -9,17 +9,17 @@ import { ContentBlockData } from './ContentBlock';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
-import { ImageDropZone } from '@/components/admin/ImageDropZone';
 
 interface BlockEditorProps {
   block: ContentBlockData;
   projectImages?: string[];
-  projectFiles?: any[];
   onSave: (block: ContentBlockData) => void;
   onCancel: () => void;
 }
+
 const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster }) => {
   const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+
   const getYouTubeID = (url: string) => {
     try {
       const u = new URL(url);
@@ -31,9 +31,8 @@ const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster })
     } catch {}
     return '';
   };
-  const youTubeID = isYouTube ? getYouTubeID(url) : '';
 
-  const isDriveMP4 = url.includes('drive.google.com') && url.endsWith('.mp4');
+  const youTubeID = isYouTube ? getYouTubeID(url) : '';
 
   return (
     <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md">
@@ -47,30 +46,18 @@ const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster })
           allowFullScreen
           className="w-full h-full object-cover rounded-xl"
         ></iframe>
-      ) : isDriveMP4 ? (
-        <video
-          src={url}
-          poster={poster}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-auto rounded-xl object-cover"
-        />
       ) : (
         <p className="text-center text-sm text-muted-foreground">
-          Video URL not recognized.
+          Video URL not recognized. Only YouTube links are supported.
         </p>
       )}
     </div>
   );
 };
 
-
 export const BlockEditor: React.FC<BlockEditorProps> = ({
   block,
   projectImages = [],
-  projectFiles = [],
   onSave,
   onCancel
 }) => {
@@ -81,47 +68,38 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setEditedBlock(block);
   }, [block]);
 
-const handleFileUpload = async (
-  fileOrUrl: File | string,
-  fileType: 'image' | 'video' | 'poster' = 'image'
-) => {
-  setUploading(true);
-  try {
-    // ✅ Case 1: External link (e.g., Google Drive)
-    if (typeof fileOrUrl === 'string') {
+  const handleFileUpload = async (file: File, fileType: 'image' | 'poster' = 'image') => {
+    setUploading(true);
+    try {
+      // Upload image to Supabase
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('project-media')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const publicUrl = supabase.storage.from('project-media').getPublicUrl(data.path).publicUrl;
+
       if (fileType === 'poster') {
-        setEditedBlock(prev => ({
-          ...prev,
-          poster: fileOrUrl
-        }));
+        setEditedBlock(prev => ({ ...prev, poster: publicUrl }));
       } else {
-        setEditedBlock(prev => ({
-          ...prev,
-          url: fileOrUrl
-        }));
+        setEditedBlock(prev => ({ ...prev, url: publicUrl }));
       }
 
-      toast.success(`${fileType === 'video' ? 'Video link' : 'Image link'} added successfully`);
-      return;
+      toast.success(`${fileType === 'poster' ? 'Poster' : 'Image'} uploaded successfully!`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image.');
+    } finally {
+      setUploading(false);
     }
-
-    // 🚫 Case 2: Local file upload (currently disabled)
-    toast.error('Direct uploads are disabled. Please paste a Google Drive link instead.');
-  } catch (error) {
-    console.error('Upload error:', error);
-    toast.error('Failed to handle video link.');
-  } finally {
-    setUploading(false);
-  }
-};
-
-  const handleSave = () => {
-    onSave(editedBlock);
   };
 
-  const getAvailableMedia = () => {
-    return projectImages.map(url => ({ url, type: 'image' as const }));
-  };
+  const handleSave = () => onSave(editedBlock);
+
+  const getAvailableMedia = () => projectImages.map(url => ({ url, type: 'image' as const }));
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-background">
@@ -186,7 +164,6 @@ const handleFileUpload = async (
 
       {block.type === 'image' && (
         <div className="space-y-4">
-          {/* Media Selection */}
           <div>
             <Label>Select from Project Images</Label>
             <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto">
@@ -204,23 +181,16 @@ const handleFileUpload = async (
             </div>
           </div>
 
-          {/* File Upload */}
           <div>
             <Label>Or Upload New Image</Label>
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file);
-                }
-              }}
+              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
               disabled={uploading}
             />
           </div>
 
-          {/* URL Input */}
           <div>
             <Label>Or Enter URL</Label>
             <Input
@@ -230,7 +200,6 @@ const handleFileUpload = async (
             />
           </div>
 
-          {/* Caption */}
           <div>
             <Label>Caption (optional)</Label>
             <Textarea
@@ -241,7 +210,6 @@ const handleFileUpload = async (
             />
           </div>
 
-          {/* Alt text */}
           <div>
             <Label>Alt Text</Label>
             <Input
@@ -253,87 +221,61 @@ const handleFileUpload = async (
         </div>
       )}
 
-{block.type === 'video' && (
-  <div className="space-y-4">
-    {/* Video URL Input */}
-    <div>
-     <Label>Video URL (YouTube or Google Drive)</Label>
-<Input
-  type="url"
-  placeholder="Paste a YouTube or Google Drive video link"
-  value={editedBlock.url || ''}
-  onChange={(e) => {
-    setEditedBlock(prev => ({ ...prev, url: e.target.value }));
-  }}
-/>
-<p className="text-xs text-muted-foreground mt-1">
-  YouTube videos will autoplay and loop silently without controls. Google Drive videos will use the normal player.
-</p>
+      {block.type === 'video' && (
+        <div className="space-y-4">
+          <div>
+            <Label>Video URL (YouTube)</Label>
+            <Input
+              type="url"
+              placeholder="Paste a YouTube video link"
+              value={editedBlock.url || ''}
+              onChange={(e) => setEditedBlock(prev => ({ ...prev, url: e.target.value }))}
+            />
+            <VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
+          </div>
 
-<VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
+          <div>
+            <Label>Poster Image (Optional)</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'poster')}
+              disabled={uploading}
+            />
+            {editedBlock.poster && (
+              <img src={editedBlock.poster} alt="Poster" className="mt-2 w-full max-h-32 object-cover rounded" />
+            )}
+          </div>
 
-    </div>
-
-    {/* Poster Upload (still uses Supabase) */}
-    <div>
-      <Label>Poster Image (Optional)</Label>
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            handleFileUpload(file, 'poster');
-          }
-        }}
-        disabled={uploading}
-      />
-      {editedBlock.poster && (
-        <img
-          src={editedBlock.poster}
-          alt="Poster"
-          className="mt-2 w-full max-h-32 object-cover rounded"
-        />
+          <div>
+            <Label>Caption (optional)</Label>
+            <Textarea
+              value={editedBlock.caption || ''}
+              onChange={(e) => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
+              placeholder="Add a caption..."
+              rows={2}
+            />
+          </div>
+        </div>
       )}
-    </div>
 
-    {/* Caption */}
-    <div>
-      <Label>Caption (optional)</Label>
-      <Textarea
-        value={editedBlock.caption || ''}
-        onChange={(e) =>
-          setEditedBlock((prev) => ({ ...prev, caption: e.target.value }))
-        }
-        placeholder="Add a caption..."
-        rows={2}
-      />
-    </div>
-  </div>
-)}
       {block.type === 'photo-grid' && (
         <div className="space-y-4">
-          {/* Grid Columns (for photo-grid) */}
-          {block.type === 'photo-grid' && (
-            <div>
-              <Label>Grid Columns</Label>
-              <Select
-                value={editedBlock.gridColumns?.toString() || '3'}
-                onValueChange={(value) => setEditedBlock(prev => ({ ...prev, gridColumns: parseInt(value) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 Columns</SelectItem>
-                  <SelectItem value="3">3 Columns</SelectItem>
-                  <SelectItem value="4">4 Columns</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div>
+            <Label>Grid Columns</Label>
+            <Select
+              value={editedBlock.gridColumns?.toString() || '3'}
+              onValueChange={(value) => setEditedBlock(prev => ({ ...prev, gridColumns: parseInt(value) }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 Columns</SelectItem>
+                <SelectItem value="3">3 Columns</SelectItem>
+                <SelectItem value="4">4 Columns</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {/* Images Selection */}
           <div>
             <Label>Select Images from Project</Label>
             <div className="grid grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto">
@@ -345,13 +287,11 @@ const handleFileUpload = async (
                     onClick={() => {
                       const currentImages = editedBlock.images || [];
                       if (isSelected) {
-                        // Remove image
                         setEditedBlock(prev => ({
                           ...prev,
                           images: currentImages.filter(img => img.url !== imageUrl)
                         }));
                       } else {
-                        // Add image
                         setEditedBlock(prev => ({
                           ...prev,
                           images: [...currentImages, { url: imageUrl, alt: '', caption: '' }]
@@ -369,7 +309,6 @@ const handleFileUpload = async (
             </div>
           </div>
 
-          {/* Edit selected images */}
           {editedBlock.images && editedBlock.images.length > 0 && (
             <div>
               <Label>Edit Image Details</Label>
@@ -381,12 +320,10 @@ const handleFileUpload = async (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          setEditedBlock(prev => ({
-                            ...prev,
-                            images: prev.images?.filter((_, i) => i !== index)
-                          }));
-                        }}
+                        onClick={() => setEditedBlock(prev => ({
+                          ...prev,
+                          images: prev.images?.filter((_, i) => i !== index)
+                        }))}
                       >
                         <X className="w-4 h-4" />
                       </Button>
