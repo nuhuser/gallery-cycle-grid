@@ -210,73 +210,81 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       )}
 
-      {block.type === 'video' && (
-        <div className="space-y-4">
-          {/* Video Upload */}
-          <div>
-            <Label>Video File</Label>
-            <Input
-              type="file"
-              accept="video/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file, 'video');
-                }
-              }}
-              disabled={uploading}
-            />
-            {editedBlock.url && (
-              <div className="mt-2">
-                <video
-                  src={editedBlock.url}
-                  poster={editedBlock.poster}
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  className="w-full max-h-64 rounded"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Poster Image */}
-          <div>
-            <Label>Poster Image (Optional)</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file, 'poster');
-                }
-              }}
-              disabled={uploading}
-            />
-            {editedBlock.poster && (
-              <img
-                src={editedBlock.poster}
-                alt="Poster"
-                className="mt-2 w-full max-h-32 object-cover rounded"
-              />
-            )}
-          </div>
-
-          {/* Caption */}
-          <div>
-            <Label>Caption (optional)</Label>
-            <Textarea
-              value={editedBlock.caption || ''}
-              onChange={(e) => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
-              placeholder="Add a caption..."
-              rows={2}
-            />
-          </div>
+{block.type === 'video' && (
+  <div className="space-y-4">
+    {/* Video URL Input */}
+    <div>
+      <Label>Google Drive Video Link</Label>
+      <Input
+        type="url"
+        placeholder="Paste Google Drive share link here"
+        value={editedBlock.url || ''}
+        onChange={(e) => {
+          const input = e.target.value;
+          // Auto-convert to direct video link if it's a Google Drive URL
+          const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          const directLink = match
+            ? `https://drive.google.com/uc?export=download&id=${match[1]}`
+            : input;
+          setEditedBlock((prev) => ({ ...prev, url: directLink }));
+        }}
+      />
+      <p className="text-xs text-muted-foreground mt-1">
+        You can paste either a Google Drive share link or a direct .mp4/.mov URL.
+      </p>
+      {editedBlock.url && (
+        <div className="mt-2">
+          <video
+            src={editedBlock.url}
+            poster={editedBlock.poster}
+            controls
+            loop
+            muted
+            playsInline
+            className="w-full max-h-64 rounded"
+            onError={() => toast.error('Video failed to load — check the link')}
+          />
         </div>
       )}
+    </div>
 
+    {/* Poster Upload (still uses Supabase) */}
+    <div>
+      <Label>Poster Image (Optional)</Label>
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            handleFileUpload(file, 'poster');
+          }
+        }}
+        disabled={uploading}
+      />
+      {editedBlock.poster && (
+        <img
+          src={editedBlock.poster}
+          alt="Poster"
+          className="mt-2 w-full max-h-32 object-cover rounded"
+        />
+      )}
+    </div>
+
+    {/* Caption */}
+    <div>
+      <Label>Caption (optional)</Label>
+      <Textarea
+        value={editedBlock.caption || ''}
+        onChange={(e) =>
+          setEditedBlock((prev) => ({ ...prev, caption: e.target.value }))
+        }
+        placeholder="Add a caption..."
+        rows={2}
+      />
+    </div>
+  </div>
+)}
       {block.type === 'photo-grid' && (
         <div className="space-y-4">
           {/* Grid Columns (for photo-grid) */}
