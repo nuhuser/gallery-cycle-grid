@@ -18,56 +18,37 @@ interface BlockEditorProps {
   onSave: (block: ContentBlockData) => void;
   onCancel: () => void;
 }
-const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const extractDriveID = (url: string) => {
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : '';
-  };
-
-  const getVideoSrc = (url: string) => {
-    if (url.includes('drive.google.com')) {
-      const id = extractDriveID(url);
-      return `https://drive.google.com/uc?export=download&id=${id}`;
-    }
-    return url;
-  };
-
+const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
   const getYouTubeID = (url: string) => {
-    const ytMatch = url.match(
-      /(?:youtube\.com\/.*v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-    );
-    return ytMatch ? ytMatch[1] : '';
+    // Match standard YouTube links, short links, and shorts links
+    const match =
+      url.match(/(?:youtube\.com\/.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : '';
   };
 
   const youTubeID = getYouTubeID(url);
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto rounded-xl shadow-md overflow-hidden">
+    <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md">
       {youTubeID ? (
         <iframe
           width="100%"
           height="480"
-          src={`https://www.youtube.com/embed/${youTubeID}?autoplay=1&loop=1&playlist=${youTubeID}`}
+          src={`https://www.youtube.com/embed/${youTubeID}?autoplay=1&loop=1&playlist=${youTubeID}&controls=0&modestbranding=1&showinfo=0&rel=0&mute=1&disablekb=1&iv_load_policy=3`}
           frameBorder="0"
           allow="autoplay; fullscreen"
           allowFullScreen
-          className="rounded-xl transition-all duration-300"
+          className="w-full h-full object-cover rounded-xl"
         ></iframe>
       ) : (
-        <video
-          controls
-          src={getVideoSrc(url)}
-          poster={poster}
-          className="w-full h-auto rounded-xl transition-all duration-300"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-        />
+        <p className="text-center text-sm text-muted-foreground">
+          Video URL not recognized.
+        </p>
       )}
     </div>
   );
 };
+
 
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
