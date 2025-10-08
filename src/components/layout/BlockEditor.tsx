@@ -18,6 +18,35 @@ interface BlockEditorProps {
   onSave: (block: ContentBlockData) => void;
   onCancel: () => void;
 }
+const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const extractDriveID = (url: string) => {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : '';
+  };
+
+  const getVideoSrc = (url: string) => {
+    if (url.includes('drive.google.com')) {
+      const id = extractDriveID(url);
+      return `https://drive.google.com/uc?export=download&id=${id}`;
+    }
+    return url;
+  };
+
+  return (
+    <div className="relative w-full max-w-4xl mx-auto rounded-xl shadow-md overflow-hidden">
+      <video
+        controls
+        src={getVideoSrc(url)}
+        poster={poster}
+        className="w-full h-auto rounded-xl transition-all duration-300"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
+    </div>
+  );
+};
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
   block,
@@ -227,23 +256,7 @@ const handleFileUpload = async (
       <p className="text-xs text-muted-foreground mt-1">
         You can paste either a Google Drive share link or a direct .mp4/.mov URL.
       </p>
-     {block.url?.includes('drive.google.com') ? (
-  <iframe
-    src={block.url}
-    width="100%"
-    height="480"
-    allow="autoplay"
-    allowFullScreen
-    className="rounded-xl shadow-md"
-  ></iframe>
-) : (
-  <video
-    controls
-    src={block.url}
-    poster={block.poster}
-    className="w-full rounded-xl shadow-md"
-  />
-)}
+<VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
     </div>
 
     {/* Poster Upload (still uses Supabase) */}
