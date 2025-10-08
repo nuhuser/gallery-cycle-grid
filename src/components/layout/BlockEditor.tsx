@@ -17,25 +17,45 @@ interface BlockEditorProps {
   onCancel: () => void;
 }
 
-const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster }) => {
-  if (!url) return <p className="text-center text-sm text-muted-foreground">No video URL provided.</p>;
+const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url }) => {
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+
+  const getYouTubeID = (url: string) => {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes('youtube.com')) {
+        if (u.pathname === '/watch') return u.searchParams.get('v') || '';
+        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
+      }
+      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+    } catch {}
+    return '';
+  };
+
+  const youTubeID = isYouTube ? getYouTubeID(url) : '';
 
   return (
     <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md">
-      <video
-        playsInline
-        loop
-        autoPlay
-        muted
-        controls
-        src={url}
-        poster={poster}
-        preload="metadata"
-        className="w-full h-auto object-cover rounded-xl"
-      ></video>
+      {isYouTube && youTubeID ? (
+        <iframe
+          width="100%"
+          height="480"
+          src={`https://www.youtube.com/embed/${youTubeID}`}
+          title="YouTube Video"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="w-full h-full rounded-xl"
+        ></iframe>
+      ) : (
+        <p className="text-center text-sm text-muted-foreground">
+          Please provide a valid YouTube URL.
+        </p>
+      )}
     </div>
   );
 };
+
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
   block,
