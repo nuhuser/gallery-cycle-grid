@@ -18,28 +18,26 @@ interface BlockEditorProps {
   onSave: (block: ContentBlockData) => void;
   onCancel: () => void;
 }
-const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
+const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster }) => {
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
   const getYouTubeID = (url: string) => {
     try {
       const u = new URL(url);
-      // Standard watch URL
       if (u.hostname.includes('youtube.com')) {
         if (u.pathname === '/watch') return u.searchParams.get('v') || '';
         if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
       }
-      // Shortened youtu.be URL
       if (u.hostname === 'youtu.be') return u.pathname.slice(1);
-    } catch {
-      return '';
-    }
+    } catch {}
     return '';
   };
+  const youTubeID = isYouTube ? getYouTubeID(url) : '';
 
-  const youTubeID = getYouTubeID(url);
+  const isDriveMP4 = url.includes('drive.google.com') && url.endsWith('.mp4');
 
   return (
     <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md">
-      {youTubeID ? (
+      {isYouTube && youTubeID ? (
         <iframe
           width="100%"
           height="480"
@@ -49,6 +47,16 @@ const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
           allowFullScreen
           className="w-full h-full object-cover rounded-xl"
         ></iframe>
+      ) : isDriveMP4 ? (
+        <video
+          src={url}
+          poster={poster}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-auto rounded-xl object-cover"
+        />
       ) : (
         <p className="text-center text-sm text-muted-foreground">
           Video URL not recognized.
@@ -57,8 +65,6 @@ const VideoBlock: React.FC<{ url: string }> = ({ url }) => {
     </div>
   );
 };
-
-
 
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -264,7 +270,7 @@ const handleFileUpload = async (
   YouTube videos will autoplay and loop silently without controls. Google Drive videos will use the normal player.
 </p>
 
-<VideoBlock url={editedBlock.url || ''} />
+<VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
 
     </div>
 
