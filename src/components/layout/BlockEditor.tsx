@@ -18,15 +18,50 @@ interface BlockEditorProps {
 }
 
 const VideoBlock: React.FC<{ iframeCode: string }> = ({ iframeCode }) => {
-  if (!iframeCode) return <p className="text-center text-sm text-muted-foreground">Paste your iframe code above.</p>;
+  if (!iframeCode || iframeCode.trim() === '') {
+    return <p className="text-center text-sm text-muted-foreground">
+      Paste your iframe code above.
+    </p>;
+  }
+
+  // Extract width and height from the iframe
+  const widthMatch = iframeCode.match(/width="(\d+)"/);
+  const heightMatch = iframeCode.match(/height="(\d+)"/);
+
+  const width = widthMatch ? parseInt(widthMatch[1], 10) : 560;
+  const height = heightMatch ? parseInt(heightMatch[1], 10) : 315;
+
+  const aspectRatio = width / height;
+
+  // Auto-modify YouTube iframe to loop/mute/autoplay
+  const modifiedIframeCode = iframeCode.replace(
+    /<iframe\s+([^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)[^"]*")([^>]*)>/,
+    (_match, pre, videoId, post) =>
+      `<iframe ${pre}?autoplay=1&loop=1&mute=1&playlist=${videoId}" ${post}>`
+  );
 
   return (
     <div
-      className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md"
-      dangerouslySetInnerHTML={{ __html: iframeCode }}
-    ></div>
+      className="relative w-full mx-auto overflow-hidden rounded-xl shadow-md"
+      style={{
+        paddingTop: `${100 / aspectRatio}%`, // maintains aspect ratio
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+        }}
+        dangerouslySetInnerHTML={{ __html: modifiedIframeCode }}
+      />
+    </div>
   );
 };
+
 
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -208,11 +243,11 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         className="w-full font-mono"
       />
 
-      {/* Render iframe preview */}
+      {/* Live preview */}
       <VideoBlock iframeCode={editedBlock.iframeCode || ''} />
     </div>
 
-    {/* Poster Image (Optional, still using Supabase) */}
+    {/* Poster Image */}
     <div>
       <Label>Poster Image (Optional)</Label>
       <Input
