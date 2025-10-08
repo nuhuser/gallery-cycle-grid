@@ -19,6 +19,7 @@ export interface ContentBlockData {
   images?: Array<{ url: string; alt?: string; caption?: string }>;
   gridColumns?: number;
   poster?: string;
+  iframeCode?: string;
 }
 
 interface ContentBlockProps {

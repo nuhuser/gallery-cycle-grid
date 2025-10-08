@@ -284,7 +284,6 @@ const ProjectLayoutEditor = () => {
                 <BlockEditor
                   block={editingBlock}
                   projectImages={project.images}
-                  projectFiles={project.files}
                   onSave={updateBlock}
                   onCancel={() => setEditingBlock(null)}
                 />

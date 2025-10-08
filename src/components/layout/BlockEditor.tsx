@@ -74,7 +74,8 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
       if (error) throw error;
 
-      const url = supabase.storage.from('project-media').getPublicUrl(data.path).publicUrl;
+      const { data: urlData } = supabase.storage.from('project-media').getPublicUrl(data.path);
+      const url = urlData.publicUrl;
 
       if (fileType === 'poster') {
         setEditedBlock(prev => ({ ...prev, poster: url }));
