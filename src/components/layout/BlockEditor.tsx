@@ -17,42 +17,14 @@ interface BlockEditorProps {
   onCancel: () => void;
 }
 
-const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url }) => {
-  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-
-  const getYouTubeID = (url: string) => {
-    try {
-      const u = new URL(url);
-      if (u.hostname.includes('youtube.com')) {
-        if (u.pathname === '/watch') return u.searchParams.get('v') || '';
-        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
-      }
-      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
-    } catch {}
-    return '';
-  };
-
-  const youTubeID = isYouTube ? getYouTubeID(url) : '';
+const VideoBlock: React.FC<{ iframeCode: string }> = ({ iframeCode }) => {
+  if (!iframeCode) return <p className="text-center text-sm text-muted-foreground">Paste your iframe code above.</p>;
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md">
-      {isYouTube && youTubeID ? (
-        <iframe
-          width="100%"
-          height="480"
-          src={`https://www.youtube.com/embed/${youTubeID}`}
-          title="YouTube Video"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          className="w-full h-full rounded-xl"
-        ></iframe>
-      ) : (
-        <p className="text-center text-sm text-muted-foreground">
-          Please provide a valid YouTube URL.
-        </p>
-      )}
-    </div>
+    <div
+      className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-xl shadow-md"
+      dangerouslySetInnerHTML={{ __html: iframeCode }}
+    ></div>
   );
 };
 
@@ -223,22 +195,24 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         </div>
       )}
 
-      {block.type === 'video' && (
+    {block.type === 'video' && (
   <div className="space-y-4">
-    {/* Video URL Input */}
+    {/* Iframe HTML Input */}
     <div>
-      <Label>Video URL</Label>
-      <Input
-        type="url"
-        placeholder="Paste a direct video link (.mp4 or .mov)"
-        value={editedBlock.url || ''}
-        onChange={(e) => setEditedBlock(prev => ({ ...prev, url: e.target.value }))}
+      <Label>Embed Video (Paste iframe code)</Label>
+      <Textarea
+        value={editedBlock.iframeCode || ''}
+        onChange={(e) => setEditedBlock(prev => ({ ...prev, iframeCode: e.target.value }))}
+        placeholder='Paste iframe embed code here, e.g. <iframe src="..."></iframe>'
+        rows={6}
+        className="w-full font-mono"
       />
 
-      <VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
+      {/* Render iframe preview */}
+      <VideoBlock iframeCode={editedBlock.iframeCode || ''} />
     </div>
 
-    {/* Poster Upload */}
+    {/* Poster Image (Optional, still using Supabase) */}
     <div>
       <Label>Poster Image (Optional)</Label>
       <Input
@@ -264,6 +238,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     </div>
   </div>
 )}
+
 
       {block.type === 'photo-grid' && (
         <div className="space-y-4">
