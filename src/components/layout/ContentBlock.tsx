@@ -20,6 +20,7 @@ export interface ContentBlockData {
   gridColumns?: number;
   poster?: string;
   iframeCode?: string;
+  iframeSrc?: string;
 }
 
 interface ContentBlockProps {
