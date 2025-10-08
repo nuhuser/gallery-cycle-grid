@@ -5,8 +5,9 @@ import { cn } from '@/lib/utils';
 
 interface MediaItem {
   url: string;
-  type: 'image';
+  type: 'image' | 'video';
   name?: string;
+  poster?: string;
 }
 
 interface MediaCarouselProps {
@@ -49,11 +50,26 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
         }}
         onClick={() => setShowLargeViewer(true)}
       >
-        <img
-          src={currentItem.url}
-          alt={currentItem.name || `Image ${currentIndex + 1}`}
-          className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
-        />
+        {currentItem.type === 'video' ? (
+          <video
+            src={currentItem.url}
+            poster={currentItem.poster}
+            controls
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="max-w-full max-h-full object-contain"
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <img
+            src={currentItem.url}
+            alt={currentItem.name || `Image ${currentIndex + 1}`}
+            className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
+          />
+        )}
 
         {/* Navigation Arrows */}
         {showControls && items.length > 1 && (
@@ -123,11 +139,26 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
               </>
             )}
             
-            <img
-              src={currentItem.url}
-              alt={currentItem.name || `Image ${currentIndex + 1}`}
-              className="max-w-[90vw] max-h-[60vh] object-contain"
-            />
+            {currentItem.type === 'video' ? (
+              <video
+                src={currentItem.url}
+                poster={currentItem.poster}
+                controls
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="max-w-[90vw] max-h-[60vh] object-contain"
+              >
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                src={currentItem.url}
+                alt={currentItem.name || `Image ${currentIndex + 1}`}
+                className="max-w-[90vw] max-h-[60vh] object-contain"
+              />
+            )}
             
             {items.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 text-foreground px-3 py-1 rounded text-sm">
@@ -154,11 +185,20 @@ export const MediaCarousel: React.FC<MediaCarouselProps> = ({
                   : "border-transparent hover:border-border hover:scale-105"
               )}
             >
-              <img
-                src={item.url}
-                alt={`Thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
+              {item.type === 'video' ? (
+                <video
+                  src={item.url}
+                  poster={item.poster}
+                  className="w-full h-full object-cover"
+                  muted
+                />
+              ) : (
+                <img
+                  src={item.url}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </button>
           ))}
         </div>

@@ -9,7 +9,7 @@ import { Lightbox } from '@/components/ui/lightbox';
 
 export interface ContentBlockData {
   id: string;
-  type: 'text' | 'image' | 'spacer' | 'photo-grid';
+  type: 'text' | 'image' | 'video' | 'spacer' | 'photo-grid';
   content?: string;
   url?: string;
   alt?: string;
@@ -18,6 +18,7 @@ export interface ContentBlockData {
   alignment?: 'left' | 'center' | 'right';
   images?: Array<{ url: string; alt?: string; caption?: string }>;
   gridColumns?: number;
+  poster?: string;
 }
 
 interface ContentBlockProps {
@@ -142,6 +143,40 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
                 <div className="text-center">
                   <Image className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to add image</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'video':
+        return (
+          <div className={cn(getSizeClass(block.size), getAlignmentClass(block.alignment))}>
+            {block.url ? (
+              <div className="space-y-2">
+                <video
+                  src={block.url}
+                  poster={block.poster}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto rounded-lg"
+                >
+                  Your browser does not support the video tag.
+                </video>
+                {block.caption && (
+                  <p className="text-sm text-muted-foreground text-center italic">
+                    {block.caption}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Click to add video</p>
                 </div>
               </div>
             )}

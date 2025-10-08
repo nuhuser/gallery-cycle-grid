@@ -199,6 +199,19 @@ const ProjectPage = () => {
                   });
                 }
                 
+                // Add project files (videos)
+                if (project.files) {
+                  project.files.forEach((file: any, index: number) => {
+                    if (file.type?.includes('video') || file.name?.toLowerCase().match(/\.(mp4|mov|webm|ogg)$/)) {
+                      mediaItems.push({
+                        url: file.url,
+                        type: 'video' as const,
+                        name: file.name || `Video ${index + 1}`
+                      });
+                    }
+                  });
+                }
+                
                 
                 return mediaItems.length > 0 ? (
                   <MediaCarousel 

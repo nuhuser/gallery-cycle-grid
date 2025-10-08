@@ -9,6 +9,7 @@ import { ContentBlockData } from './ContentBlock';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
+import { ImageDropZone } from '@/components/admin/ImageDropZone';
 
 interface BlockEditorProps {
   block: ContentBlockData;
@@ -32,12 +33,13 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
     setEditedBlock(block);
   }, [block]);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, fileType: 'image' | 'video' | 'poster' = 'image') => {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `layouts/${fileName}`;
+      const folder = fileType === 'video' ? 'videos' : 'layouts';
+      const filePath = `${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('project-files')
@@ -49,12 +51,19 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
         .from('project-files')
         .getPublicUrl(filePath);
 
-      setEditedBlock(prev => ({
-        ...prev,
-        url: data.publicUrl
-      }));
+      if (fileType === 'poster') {
+        setEditedBlock(prev => ({
+          ...prev,
+          poster: data.publicUrl
+        }));
+      } else {
+        setEditedBlock(prev => ({
+          ...prev,
+          url: data.publicUrl
+        }));
+      }
 
-      toast.success('Image uploaded successfully');
+      toast.success(`${fileType === 'video' ? 'Video' : 'Image'} uploaded successfully`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload file');
@@ -82,7 +91,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       </div>
 
       {/* Size and Alignment Controls */}
-      {(block.type === 'text' || block.type === 'image' || block.type === 'photo-grid') && (
+      {(block.type === 'text' || block.type === 'image' || block.type === 'video' || block.type === 'photo-grid') && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Size</Label>
@@ -196,6 +205,73 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
               value={editedBlock.alt || ''}
               onChange={(e) => setEditedBlock(prev => ({ ...prev, alt: e.target.value }))}
               placeholder="Describe the image for accessibility..."
+            />
+          </div>
+        </div>
+      )}
+
+      {block.type === 'video' && (
+        <div className="space-y-4">
+          {/* Video Upload */}
+          <div>
+            <Label>Video File</Label>
+            <Input
+              type="file"
+              accept="video/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleFileUpload(file, 'video');
+                }
+              }}
+              disabled={uploading}
+            />
+            {editedBlock.url && (
+              <div className="mt-2">
+                <video
+                  src={editedBlock.url}
+                  poster={editedBlock.poster}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  className="w-full max-h-64 rounded"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Poster Image */}
+          <div>
+            <Label>Poster Image (Optional)</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleFileUpload(file, 'poster');
+                }
+              }}
+              disabled={uploading}
+            />
+            {editedBlock.poster && (
+              <img
+                src={editedBlock.poster}
+                alt="Poster"
+                className="mt-2 w-full max-h-32 object-cover rounded"
+              />
+            )}
+          </div>
+
+          {/* Caption */}
+          <div>
+            <Label>Caption (optional)</Label>
+            <Textarea
+              value={editedBlock.caption || ''}
+              onChange={(e) => setEditedBlock(prev => ({ ...prev, caption: e.target.value }))}
+              placeholder="Add a caption..."
+              rows={2}
             />
           </div>
         </div>
