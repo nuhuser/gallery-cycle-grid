@@ -241,25 +241,21 @@ const handleFileUpload = async (
   <div className="space-y-4">
     {/* Video URL Input */}
     <div>
-      <Label>Google Drive Video Link</Label>
-      <Input
-        type="url"
-        placeholder="Paste Google Drive share link here"
-        value={editedBlock.url || ''}
-        onChange={(e) => {
-          const input = e.target.value;
-          // Auto-convert to direct video link if it's a Google Drive URL
-          const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
-          const directLink = match
-            ? `https://drive.google.com/uc?export=download&id=${match[1]}`
-            : input;
-          setEditedBlock((prev) => ({ ...prev, url: directLink }));
-        }}
-      />
-      <p className="text-xs text-muted-foreground mt-1">
-        You can paste either a Google Drive share link or a direct .mp4/.mov URL.
-      </p>
-<VideoBlock url={editedBlock.url || ''} poster={editedBlock.poster} />
+     <Label>Video URL (YouTube or Google Drive)</Label>
+<Input
+  type="url"
+  placeholder="Paste a YouTube or Google Drive video link"
+  value={editedBlock.url || ''}
+  onChange={(e) => {
+    setEditedBlock(prev => ({ ...prev, url: e.target.value }));
+  }}
+/>
+<p className="text-xs text-muted-foreground mt-1">
+  YouTube videos will autoplay and loop silently without controls. Google Drive videos will use the normal player.
+</p>
+
+<VideoBlock url={editedBlock.url || ''} />
+
     </div>
 
     {/* Poster Upload (still uses Supabase) */}
