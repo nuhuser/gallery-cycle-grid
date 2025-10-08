@@ -34,19 +34,41 @@ const VideoBlock: React.FC<{ url: string; poster?: string }> = ({ url, poster })
     return url;
   };
 
+  const getYouTubeID = (url: string) => {
+    const ytMatch = url.match(
+      /(?:youtube\.com\/.*v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    );
+    return ytMatch ? ytMatch[1] : '';
+  };
+
+  const youTubeID = getYouTubeID(url);
+
   return (
     <div className="relative w-full max-w-4xl mx-auto rounded-xl shadow-md overflow-hidden">
-      <video
-        controls
-        src={getVideoSrc(url)}
-        poster={poster}
-        className="w-full h-auto rounded-xl transition-all duration-300"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
+      {youTubeID ? (
+        <iframe
+          width="100%"
+          height="480"
+          src={`https://www.youtube.com/embed/${youTubeID}?autoplay=1&loop=1&playlist=${youTubeID}`}
+          frameBorder="0"
+          allow="autoplay; fullscreen"
+          allowFullScreen
+          className="rounded-xl transition-all duration-300"
+        ></iframe>
+      ) : (
+        <video
+          controls
+          src={getVideoSrc(url)}
+          poster={poster}
+          className="w-full h-auto rounded-xl transition-all duration-300"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+        />
+      )}
     </div>
   );
 };
+
 
 export const BlockEditor: React.FC<BlockEditorProps> = ({
   block,
