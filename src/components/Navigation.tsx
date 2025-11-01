@@ -5,18 +5,18 @@ export const Navigation = () => {
         <ul className="flex flex-col space-y-4 text-sm font-medium">
           <li>
             <a 
-              href="#work" 
+              href="#projects" 
               className="text-foreground hover:text-hero-accent transition-colors duration-300 uppercase tracking-wider"
             >
-              Work
+              Projects
             </a>
           </li>
           <li>
             <a 
-              href="#about" 
+              href="#work" 
               className="text-foreground hover:text-hero-accent transition-colors duration-300 uppercase tracking-wider"
             >
-              About
+              Work
             </a>
           </li>
           <li>

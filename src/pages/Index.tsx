@@ -29,7 +29,7 @@ const Index = () => {
       {/* Main Content Container */}
       <div className="w-full">
         {/* Projects Grid Section */}
-        <section id="work" className="relative bg-background py-20">
+        <section id="projects" className="relative bg-background py-20">
           <div className="mb-16 px-8">
             <h2 className="heading-large mb-6 text-left">Projects</h2>
           </div>
@@ -38,10 +38,20 @@ const Index = () => {
           <DatabasePhotoGrid />
         </div>
         </section>
+
+        {/* Work Experience Section */}
+        <section id="work" className="relative bg-background py-20 border-t border-border/50">
+          <div className="max-w-7xl mx-auto px-8">
+            <h2 className="heading-large mb-12 text-left">Work Experience</h2>
+            <div className="space-y-8">
+              <p className="text-muted-foreground">Work experience content coming soon.</p>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-8 py-12 border-t border-border/50">
+      <footer id="contact" className="max-w-7xl mx-auto px-8 py-12 border-t border-border/50">
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h3 className="font-bold mb-4 text-sm">Get in Touch</h3>

@@ -54,16 +54,7 @@ export const FeaturedPhotoGrid = () => {
   };
 
   if (loading) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-        {[...Array(3)].map((_, index) => (
-          <div
-            key={index}
-            className="aspect-square bg-muted rounded-lg animate-pulse"
-          />
-        ))}
-      </div>
-    );
+    return null;
   }
 
   if (featuredProjects.length === 0) {
