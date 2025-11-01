@@ -24,6 +24,7 @@ interface Project {
   slug: string;
   logo_url: string;
   logo_link: string;
+  project_type: string;
 }
 
 const AdminDashboard = () => {

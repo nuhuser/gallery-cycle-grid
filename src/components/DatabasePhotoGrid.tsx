@@ -17,9 +17,14 @@ interface Project {
   files: any;
   is_featured: boolean;
   slug: string;
+  project_type: string;
 }
 
-export const DatabasePhotoGrid = () => {
+interface DatabasePhotoGridProps {
+  projectType?: 'project' | 'work';
+}
+
+export const DatabasePhotoGrid = ({ projectType = 'project' }: DatabasePhotoGridProps) => {
   const { isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +39,7 @@ export const DatabasePhotoGrid = () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .eq('project_type', projectType)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -46,7 +52,9 @@ export const DatabasePhotoGrid = () => {
     }
   };
 
-  const featuredProjects = projects.filter(project => project.is_featured);
+  useEffect(() => {
+    fetchProjects();
+  }, [projectType]);
 
   const preloadProjectPage = (slug: string) => {
     // Preload the project page for instant navigation
@@ -56,9 +64,15 @@ export const DatabasePhotoGrid = () => {
     document.head.appendChild(link);
   };
 
-  if (loading) {
-    return null;
+
+  if (projects.length === 0 && !loading) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No {projectType === 'work' ? 'work experience' : 'projects'} yet.</p>
+      </div>
+    );
   }
+
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">

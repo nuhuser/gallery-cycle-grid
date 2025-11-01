@@ -29,6 +29,7 @@ interface Project {
   slug: string;
   logo_url: string;
   logo_link: string;
+  project_type: string;
 }
 
 interface CompanyOption {
@@ -52,6 +53,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
     company: project?.company || '',
     is_featured: project?.is_featured || false,
     logo_link: project?.logo_link || '',
+    project_type: project?.project_type || 'project',
   });
   const [coverImage, setCoverImage] = useState<string>(project?.cover_image || '');
   const [hoverImage, setHoverImage] = useState<string>(project?.hover_image || '');
@@ -195,6 +197,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
         company: formData.company ? sanitizeInputForSubmit(formData.company) : null,
         logo_link: formData.logo_link ? sanitizeInputForSubmit(formData.logo_link) : '',
         is_featured: formData.is_featured,
+        project_type: formData.project_type,
         cover_image: coverImage,
         hover_image: hoverImage,
         logo_url: logoImage,
@@ -333,7 +336,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
               <Input
@@ -351,6 +354,18 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
                 onCheckedChange={(checked) => handleInputChange('is_featured', checked)}
               />
               <Label htmlFor="featured">Featured Project</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project_type">Display In</Label>
+              <Select value={formData.project_type} onValueChange={(value) => handleInputChange('project_type', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="project">Projects Section</SelectItem>
+                  <SelectItem value="work">Work Experience Section</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
