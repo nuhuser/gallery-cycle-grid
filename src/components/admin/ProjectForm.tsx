@@ -304,26 +304,18 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
             </div>
             <div className="space-y-2">
               <Label htmlFor="company">Company</Label>
-              <div className="space-y-2">
-                <Select value={formData.company} onValueChange={(value) => handleInputChange('company', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select existing company or type new" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.name} value={company.name}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  id="company"
-                  value={formData.company}
-                  onChange={(e) => handleInputChange('company', e.target.value)}
-                  placeholder="Or type new company name"
-                />
-              </div>
+              <Input
+                id="company"
+                list="companies-list"
+                value={formData.company}
+                onChange={(e) => handleInputChange('company', e.target.value)}
+                placeholder="Type company name or select from suggestions"
+              />
+              <datalist id="companies-list">
+                {companies.map((company) => (
+                  <option key={company.name} value={company.name} />
+                ))}
+              </datalist>
             </div>
           </div>
 
