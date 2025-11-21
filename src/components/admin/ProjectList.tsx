@@ -41,6 +41,46 @@ export const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDe
       {projects.map((project) => (
         <Card key={project.id} className="group relative">
           <CardHeader className="pb-4">
+            {/* Action buttons - always visible */}
+            <div className="absolute top-2 right-2 flex gap-1 z-10">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => window.open(`/project/${project.slug}`, '_blank')}
+                className="h-8 w-8"
+                title="View Project"
+              >
+                <Eye className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => window.open(`/project/${project.slug}/edit-layout`, '_blank')}
+                className="h-8 w-8"
+                title="Edit Layout"
+              >
+                <Layout className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => onEdit(project)}
+                className="h-8 w-8"
+                title="Edit Project"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => onDelete(project.id)}
+                className="h-8 w-8"
+                title="Delete Project"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+            
             {project.cover_image && (
               <div className="aspect-video rounded-lg overflow-hidden mb-4 relative">
                 <img
@@ -48,45 +88,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDe
                   alt={project.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {/* Action buttons overlay */}
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => window.open(`/project/${project.slug}`, '_blank')}
-                    className="h-8 w-8 bg-background/80 hover:bg-background/90"
-                    title="View Project"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => window.open(`/project/${project.slug}/edit-layout`, '_blank')}
-                    className="h-8 w-8 bg-background/80 hover:bg-background/90"
-                    title="Edit Layout"
-                  >
-                    <Layout className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => onEdit(project)}
-                    className="h-8 w-8 bg-background/80 hover:bg-background/90"
-                    title="Edit Project"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => onDelete(project.id)}
-                    className="h-8 w-8 bg-destructive/80 hover:bg-destructive/90"
-                    title="Delete Project"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
               </div>
             )}
             <div className="flex items-start justify-between">
