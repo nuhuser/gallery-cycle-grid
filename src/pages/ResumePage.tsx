@@ -37,12 +37,12 @@ const ResumePage = () => {
     queryKey: ['resume-categories'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('resume_categories')
+        .from('resume_categories' as any)
         .select('*')
         .order('name');
       
       if (error) throw error;
-      return data as ResumeCategory[];
+      return (data || []) as unknown as ResumeCategory[];
     },
   });
 
@@ -65,7 +65,7 @@ const ResumePage = () => {
       
       // Insert category
       const { data, error } = await supabase
-        .from('resume_categories')
+        .from('resume_categories' as any)
         .insert({
           name,
           resume_url: urlData.publicUrl,
@@ -75,7 +75,7 @@ const ResumePage = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as unknown as ResumeCategory;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resume-categories'] });
@@ -93,7 +93,7 @@ const ResumePage = () => {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('resume_categories')
+        .from('resume_categories' as any)
         .delete()
         .eq('id', id);
       
