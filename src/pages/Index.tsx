@@ -4,7 +4,7 @@ import { FeaturedPhotoGrid } from '@/components/FeaturedPhotoGrid';
 import { Navigation } from '@/components/Navigation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, FileText } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -42,10 +42,18 @@ const Index = () => {
         {/* Work Experience Section */}
         <section id="work" className="relative bg-background py-20 border-t border-border/50">
           <div className="mb-16 px-8">
-            <h2 className="heading-large mb-12 text-left">Work Experience</h2>
+            <h2 className="heading-large mb-6 text-left">Work Experience</h2>
           </div>
           <div className="px-8">
             <DatabasePhotoGrid projectType="work" />
+          </div>
+          <div className="px-8 mt-12">
+            <Link to="/resume">
+              <Button variant="outline" size="lg" className="gap-2">
+                <FileText className="w-5 h-5" />
+                See Resume
+              </Button>
+            </Link>
           </div>
         </section>
       </div>

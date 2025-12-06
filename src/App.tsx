@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProjectPage from './pages/ProjectPage';
 import ProjectLayoutEditor from './pages/ProjectLayoutEditor';
 import EmbedVideo from './pages/EmbedVideo';
+import ResumePage from './pages/ResumePage';
 import { AuthProvider } from './contexts/AuthContext';
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/project/:slug" element={<ProjectPage />} />
             <Route path="/project/:slug/edit-layout" element={<ProjectLayoutEditor />} />
             <Route path="/embed-video" element={<EmbedVideo />} />
+            <Route path="/resume" element={<ResumePage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
