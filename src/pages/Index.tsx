@@ -1,4 +1,3 @@
-import { HeroFrame } from '@/components/HeroFrame';
 import { DatabasePhotoGrid } from '@/components/DatabasePhotoGrid';
 import { Navigation } from '@/components/Navigation';
 import { Link } from 'react-router-dom';
@@ -10,18 +9,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Fullscreen Hero Section */}
-      <section className="relative h-screen w-full overflow-hidden">
-        {/* Logo centered */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mix-blend-difference">
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 w-full">
+        <div className="px-8">
+          <h1 className="text-5xl md:text-7xl font-bold text-foreground">
             Nuh Ali
           </h1>
-        </div>
-
-        {/* Fullscreen Hero Frame */}
-        <div className="absolute inset-0">
-          <HeroFrame />
         </div>
       </section>
 
