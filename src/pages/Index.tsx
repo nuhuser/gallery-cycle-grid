@@ -10,7 +10,7 @@ const Index = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 w-full">
+      <section className="relative pt-20 pb-10 w-full">
         <div className="px-8 text-center">
           <h1 className="text-5xl md:text-7xl font-normal text-foreground">
             Nuh Ali
