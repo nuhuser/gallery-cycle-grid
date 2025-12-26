@@ -23,7 +23,7 @@ const Index = () => {
         {/* Projects Grid Section */}
         <section id="projects" className="relative bg-background py-20">
           <div className="mb-16 px-8">
-            <h2 className="text-3xl md:text-4xl font-normal tracking-tight mb-6 text-left">Projects</h2>
+            <h2 className="text-2xl md:text-3xl font-normal tracking-tight mb-6 text-left">Projects</h2>
           </div>
         
           <div className="animate-slide-up px-8" style={{ animationDelay: '400ms' }}>
@@ -34,7 +34,7 @@ const Index = () => {
         {/* Work Experience Section */}
         <section id="work" className="relative bg-background py-20 border-t border-border/50">
           <div className="mb-16 px-8">
-            <h2 className="text-3xl md:text-4xl font-normal tracking-tight mb-6 text-left">Work Experience</h2>
+            <h2 className="text-2xl md:text-3xl font-normal tracking-tight mb-6 text-left">Work Experience</h2>
           </div>
           <div className="px-8">
             <DatabasePhotoGrid projectType="work" />
