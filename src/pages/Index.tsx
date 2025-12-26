@@ -1,6 +1,5 @@
 import { HeroFrame } from '@/components/HeroFrame';
 import { DatabasePhotoGrid } from '@/components/DatabasePhotoGrid';
-import { FeaturedPhotoGrid } from '@/components/FeaturedPhotoGrid';
 import { Navigation } from '@/components/Navigation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
