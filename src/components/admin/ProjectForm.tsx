@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from './FileUpload';
@@ -338,14 +338,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSave, onCan
                 onChange={(e) => handleInputChange('date', e.target.value)}
                 placeholder="e.g., Winter 2023, March 2024, Q1 2024"
               />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="featured"
-                checked={formData.is_featured}
-                onCheckedChange={(checked) => handleInputChange('is_featured', checked)}
-              />
-              <Label htmlFor="featured">Featured Project</Label>
             </div>
             <div className="space-y-2">
               <Label htmlFor="project_type">Display In</Label>
