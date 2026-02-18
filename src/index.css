@@ -157,7 +157,7 @@ All colors MUST be HSL.
   }
 
   .photo-grid-item {
-    @apply relative overflow-hidden rounded-lg transition-all duration-300;
+    @apply relative overflow-hidden rounded-none transition-all duration-300;
     aspect-ratio: 1;
     background: hsl(var(--muted));
   }
